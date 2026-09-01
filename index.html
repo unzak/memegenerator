@@ -14,7 +14,6 @@
   <body>
     <header class="top">
       <h1>Meme Generator</h1>
-      <p>Banda con el texto arriba y la foto debajo · 1080 de ancho</p>
     </header>
 
     <main class="layout">
@@ -34,21 +33,11 @@
             <option value="center" selected>Centrado</option>
             <option value="left">A la izquierda</option>
           </select>
-          <p class="muted small">
-            A la izquierda, el bloque sigue centrado y las líneas se alinean entre sí
-            por la línea más larga. Solo llega al margen si esa línea ocupa todo
-            el ancho.
-          </p>
         </div>
 
         <div class="field">
           <label for="font">Tipografía</label>
           <select id="font"></select>
-          <p class="muted small">
-            Helvetica solo sale como Helvetica en equipos que la tengan, casi siempre
-            Mac. En Windows el sistema la sustituye por Arial, que es métricamente
-            idéntica, así que el resultado es el mismo que «Arial Bold».
-          </p>
         </div>
 
         <div class="field">
@@ -78,15 +67,6 @@
             Zoom <span class="muted small">· arrastra la vista previa para mover la foto</span>
           </label>
           <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" />
-          <p class="muted small">
-            La rueda del ratón y el pellizco actúan sobre lo que haya debajo: encima
-            de la foto hacen zoom de la foto, y encima del rótulo cambian el tamaño
-            de la letra.
-          </p>
-          <p class="muted small">
-            El lienzo es siempre 1080 × 1350, así que la banda le quita alto al hueco
-            de la foto y la foto se recorta para llenarlo.
-          </p>
         </div>
 
         <h2>4 · Colores</h2>

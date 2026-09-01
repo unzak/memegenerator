@@ -37,11 +37,6 @@ body {
   letter-spacing: -0.02em;
 }
 
-.top p {
-  margin: 4px 0 0;
-  color: var(--muted);
-}
-
 .layout {
   max-width: 1180px;
   margin: 0 auto;
