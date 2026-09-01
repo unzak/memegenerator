@@ -18,11 +18,14 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
 2. Elige **tipografía** y **tamaño de letra**. Manda el tamaño: **la banda se
    adapta** a lo que ocupe el texto, no hay un alto reservado de antemano.
 
-   Hay cinco: Helvetica Bold, Arial Bold, Arial Black, Inter Bold e Impact.
-   Todas son del sistema menos Inter, que se descarga de Google Fonts. **Inter
-   Bold va por defecto**, precisamente porque al descargarse sale igual en
-   cualquier equipo; las del sistema dependen de lo que tenga instalado cada
-   uno.
+   Hay seis: Helvetica Bold, Arial Bold, Arial Black, Inter Bold, SF Pro Medium
+   e Impact. Inter viene de Google Fonts y SF Pro la sirve el propio repo; las
+   otras cuatro son del sistema y dependen de lo que tenga instalado cada
+   equipo. **Inter Bold va por defecto**, precisamente porque al descargarse
+   sale igual en todas partes.
+
+   SF Pro es la única que no es negrita — Medium (500) —, así que el rótulo se
+   ve bastante más ligero con ella.
 
    **Helvetica solo sale como Helvetica donde esté instalada**, que en la
    práctica es Mac. Windows la sustituye por Arial a nivel de sistema, y como
@@ -81,6 +84,7 @@ despliega a Pages en cada push a `main`.
 
 | Archivo | Qué hay dentro |
 | --- | --- |
+| `src/assets/` | La SF Pro, reducida a Latin y en woff2 (54 KB). |
 | `src/format.ts` | Las medidas, las tipografías y la paleta. Es lo único que hay que tocar para cambiar el diseño. |
 | `src/render.ts` | El ajuste del texto y el dibujo sobre el lienzo. No toca el DOM. |
 | `src/main.ts` | La interfaz: carga de foto, encuadre, colores y descarga. |

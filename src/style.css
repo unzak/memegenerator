@@ -1,3 +1,16 @@
+/*
+ * SF Pro Display Medium. El .otf original pesa 5,1 MB porque trae 30.853
+ * glifos; aqui va reducido a Latin y en woff2, 54 KB, sin perder acentos,
+ * eñes, ¿¡, comillas angulares ni el simbolo del euro.
+ */
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("./assets/sf-pro-display-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #12100f;
   --panel: #1c1a19;

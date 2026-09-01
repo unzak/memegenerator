@@ -47,14 +47,17 @@ export interface Font {
   /** Pila completa, con respaldos por si la familia no esta instalada. */
   stack: string;
   weight: number;
-  /** True si hay que esperar a que la descargue Google Fonts. */
+  /** True si no es del sistema y hay que esperar a que se descargue. */
   webfont: boolean;
 }
 
 /**
- * Las cinco tipografias del rotulo. Cuatro son del sistema y solo Inter se
- * descarga. Ojo con Helvetica: en Windows no viene instalada y cae en Arial,
- * asi que la interfaz avisa cuando eso pasa en vez de dejarlo en silencio.
+ * Las tipografias del rotulo. Las del sistema dependen de lo que tenga cada
+ * equipo; Inter viene de Google Fonts y SF Pro va servida por el repo. Ojo con
+ * Helvetica: en Windows no viene instalada y cae en Arial.
+ *
+ * SF Pro es la unica que no es negrita: Medium (500) es bastante mas fina que
+ * el resto, asi que el rotulo se ve mas ligero con ella.
  *
  * Arial Black e Impact son familias que ya son gruesas de por si, asi que van
  * a peso 400: pedirles 700 haria que el navegador las engordase encima.
@@ -90,6 +93,14 @@ export const FONTS: Font[] = [
     family: "Inter",
     stack: '"Inter", system-ui, sans-serif',
     weight: 700,
+    webfont: true,
+  },
+  {
+    id: "sfpro",
+    label: "SF Pro Medium",
+    family: "SF Pro Display",
+    stack: '"SF Pro Display", system-ui, sans-serif',
+    weight: 500,
     webfont: true,
   },
   {
