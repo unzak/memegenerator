@@ -102,15 +102,19 @@ export const FONTS: Font[] = [
   },
 ];
 
-/** Arial Bold: la unica de las cinco que esta en todos los equipos. */
-export const FONT_DEFAULT = FONTS[1]!;
+/**
+ * Inter Bold. Es la unica que se descarga, asi que sale igual en cualquier
+ * equipo; las del sistema dependen de lo que tenga instalado cada uno.
+ */
+export const FONT_DEFAULT = FONTS.find((f) => f.id === "inter") ?? FONTS[0]!;
 
 export function fontById(id: string): Font {
   return FONTS.find((f) => f.id === id) ?? FONT_DEFAULT;
 }
 
 /**
- * Paleta de la casa para los selectores de color. El rosa es el de Cabronazi,
- * el mismo `#cc1c65` que en news-maker, medido alli sobre el logo original.
+ * Paleta de la casa para los selectores de color. El rosa es el de Cabronazi y
+ * el verde el de Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` que en
+ * news-maker, medidos alli sobre los logos originales.
  */
-export const SWATCHES = ["#ffffff", "#000000", "#cc1c65", "#e11d2f", "#111111"];
+export const SWATCHES = ["#ffffff", "#000000", "#cc1c65", "#e11d2f", "#00ce5c"];

@@ -375,6 +375,10 @@ previewEl.addEventListener(
 // --- Dibujo ----------------------------------------------------------------
 
 function draw(): void {
+  // Centralizado aqui: asi ningun cambio puede dejar un encuadre invalido.
+  // Escribir tambien mueve el hueco de la foto, y sin esto un desplazamiento
+  // que era valido con la banda corta destapaba la banda al crecer.
+  clampOffset();
   const opts = options();
   const layout = render(previewCtx, opts);
   sizeValueEl.textContent = sizeEl.value;

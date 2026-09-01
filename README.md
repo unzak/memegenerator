@@ -14,8 +14,10 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    adapta** a lo que ocupe el texto, no hay un alto reservado de antemano.
 
    Hay cinco: Helvetica Bold, Arial Bold, Arial Black, Inter Bold e Impact.
-   Todas son del sistema menos Inter, que se descarga de Google Fonts. Arial
-   Bold va por defecto porque es la única que está en todos los equipos.
+   Todas son del sistema menos Inter, que se descarga de Google Fonts. **Inter
+   Bold va por defecto**, precisamente porque al descargarse sale igual en
+   cualquier equipo; las del sistema dependen de lo que tenga instalado cada
+   uno.
 
    **Helvetica solo sale como Helvetica donde esté instalada**, que en la
    práctica es Mac. Windows la sustituye por Arial a nivel de sistema, y como
