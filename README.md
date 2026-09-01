@@ -12,8 +12,15 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    resaltado, igual que en news-maker.
 2. Elige **tipografía** y **tamaño de letra**. Manda el tamaño: **la banda se
    adapta** a lo que ocupe el texto, no hay un alto reservado de antemano.
-   Arial va por defecto porque es la del formato clásico de meme y está en todos
-   los equipos, así que no depende de ninguna descarga.
+
+   Hay cinco: Helvetica Bold, Arial Bold, Arial Black, Inter Bold e Impact.
+   Todas son del sistema menos Inter, que se descarga de Google Fonts. Arial
+   Bold va por defecto porque es la única que está en todos los equipos.
+
+   **Helvetica solo sale como Helvetica donde esté instalada**, que en la
+   práctica es Mac. Windows la sustituye por Arial a nivel de sistema, y como
+   las dos son métricamente idénticas a propósito, el resultado es exactamente
+   el mismo que «Arial Bold» y no hay forma de detectarlo desde el navegador.
 3. Arrastra la **foto** (o elígela con el botón, o **pégala** con Ctrl+V desde
    una captura).
 4. Ajusta el **encuadre**. Como el lienzo no se mueve, lo que la banda ocupa se
@@ -66,9 +73,6 @@ despliega a Pages en cada push a `main`.
 
 ## Pendiente
 
-- **La tipografía definitiva.** Ahora mismo hay cuatro para elegir y Arial va
-  por defecto, pero esto es un marcador de posición: en cuanto esté decidida,
-  se fija en `FONT_DEFAULT` de `src/format.ts`.
 - **Medir la referencia.** Lo que hizo que news-maker saliera clavado fue medir
   el PSD en vez de estimar. Aquí los márgenes y el cuerpo son de diseño, así que
   si aparece una referencia hay que volver a medir sobre ella.

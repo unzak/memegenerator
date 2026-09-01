@@ -42,6 +42,8 @@ export const ZOOM_MAX = 3;
 export interface Font {
   id: string;
   label: string;
+  /** Nombre a secas de la familia, para comprobar si esta instalada. */
+  family: string;
   /** Pila completa, con respaldos por si la familia no esta instalada. */
   stack: string;
   weight: number;
@@ -50,42 +52,58 @@ export interface Font {
 }
 
 /**
- * Tipografias disponibles. Arial va por defecto porque es la del formato
- * clasico de meme rotulado y esta en todos los equipos, asi que no depende de
- * ninguna descarga.
+ * Las cinco tipografias del rotulo. Cuatro son del sistema y solo Inter se
+ * descarga. Ojo con Helvetica: en Windows no viene instalada y cae en Arial,
+ * asi que la interfaz avisa cuando eso pasa en vez de dejarlo en silencio.
+ *
+ * Arial Black e Impact son familias que ya son gruesas de por si, asi que van
+ * a peso 400: pedirles 700 haria que el navegador las engordase encima.
  */
 export const FONTS: Font[] = [
   {
-    id: "arial",
-    label: "Arial",
-    stack: 'Arial, "Helvetica Neue", Helvetica, sans-serif',
+    id: "helvetica",
+    label: "Helvetica Bold",
+    family: "Helvetica",
+    stack: 'Helvetica, "Helvetica Neue", Arial, sans-serif',
     weight: 700,
     webfont: false,
   },
   {
-    id: "impact",
-    label: "Impact",
-    stack: 'Impact, "Haettenschweiler", "Arial Narrow Bold", sans-serif',
+    id: "arial",
+    label: "Arial Bold",
+    family: "Arial",
+    stack: "Arial, Helvetica, sans-serif",
+    weight: 700,
+    webfont: false,
+  },
+  {
+    id: "arial-black",
+    label: "Arial Black",
+    family: "Arial Black",
+    stack: '"Arial Black", Gadget, sans-serif',
     weight: 400,
     webfont: false,
   },
   {
-    id: "poppins",
-    label: "Poppins",
-    stack: '"Poppins", system-ui, sans-serif',
+    id: "inter",
+    label: "Inter Bold",
+    family: "Inter",
+    stack: '"Inter", system-ui, sans-serif',
     weight: 700,
     webfont: true,
   },
   {
-    id: "roboto",
-    label: "Roboto",
-    stack: '"Roboto", system-ui, sans-serif',
-    weight: 700,
-    webfont: true,
+    id: "impact",
+    label: "Impact",
+    family: "Impact",
+    stack: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    weight: 400,
+    webfont: false,
   },
 ];
 
-export const FONT_DEFAULT = FONTS[0]!;
+/** Arial Bold: la unica de las cinco que esta en todos los equipos. */
+export const FONT_DEFAULT = FONTS[1]!;
 
 export function fontById(id: string): Font {
   return FONTS.find((f) => f.id === id) ?? FONT_DEFAULT;

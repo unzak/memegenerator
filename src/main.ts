@@ -10,6 +10,7 @@ import {
   ZOOM_MAX,
   ZOOM_MIN,
   fontById,
+  type Font,
 } from "./format.js";
 import {
   clampPhotoOffset,
@@ -100,17 +101,47 @@ for (const font of FONTS) {
 fontEl.value = FONT_DEFAULT.id;
 
 /**
+ * True si la familia esta en el equipo. Se mide un texto con ella y con tres
+ * genericas: si el ancho no cambia respecto a ninguna, es que no existe y el
+ * navegador esta cayendo en la de respaldo.
+ *
+ * Ojo con lo que NO detecta: Windows sustituye Helvetica por Arial a nivel de
+ * sistema, y ademas las dos son metricamente identicas a proposito, asi que
+ * ninguna medida de anchura puede distinguirlas. Esto solo pilla las familias
+ * que faltan del todo, sin sustituta.
+ */
+function fontInstalled(font: Font): boolean {
+  const probe = "MMMWWWmmmwww@#$%";
+  return ["monospace", "serif", "sans-serif"].some((generic) => {
+    previewCtx.font = `${font.weight} 72px ${generic}`;
+    const base = previewCtx.measureText(probe).width;
+    previewCtx.font = `${font.weight} 72px "${font.family}", ${generic}`;
+    return previewCtx.measureText(probe).width !== base;
+  });
+}
+
+/**
  * Espera a la fuente elegida antes de medir. Sin esto, la primera pasada mide
  * con la de respaldo y el texto sale con un ajuste que no corresponde.
  */
 async function ensureFont(): Promise<void> {
   const font = fontById(fontEl.value);
-  if (!font.webfont) return;
-  try {
-    await document.fonts.load(`${font.weight} 64px ${font.stack}`);
-    await document.fonts.ready;
-  } catch {
-    setStatus(`No se pudo cargar ${font.label}; se usará una fuente de respaldo.`, "error");
+  if (font.webfont) {
+    try {
+      await document.fonts.load(`${font.weight} 64px ${font.stack}`);
+      await document.fonts.ready;
+    } catch {
+      setStatus(`No se pudo cargar ${font.label}; se usará una de respaldo.`, "error");
+      return;
+    }
+  }
+  if (!fontInstalled(font)) {
+    setStatus(
+      `${font.label} no está instalada en este equipo: se rotulará con la de respaldo.`,
+      "error",
+    );
+  } else {
+    setStatus("");
   }
 }
 
