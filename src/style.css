@@ -1,0 +1,262 @@
+:root {
+  --bg: #12100f;
+  --panel: #1c1a19;
+  --panel-2: #262322;
+  --line: #35312f;
+  --text: #f2eeec;
+  --muted: #9a918d;
+  --accent: #d81b60;
+  --accent-hover: #ef2a70;
+  --error: #ff8a8a;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 32px 24px 64px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.top {
+  max-width: 1180px;
+  margin: 0 auto 28px;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.top p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+h2:not(:first-child) {
+  margin-top: 26px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 12px;
+}
+
+textarea,
+select,
+input[type="range"] {
+  width: 100%;
+}
+
+textarea,
+select {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+input[type="range"] {
+  accent-color: var(--accent);
+}
+
+input[type="color"] {
+  width: 100%;
+  height: 38px;
+  padding: 2px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.colors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.swatches {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.drop {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  padding: 22px 16px;
+  text-align: center;
+}
+
+.drop.over {
+  border-color: var(--accent);
+  border-style: solid;
+}
+
+.drop p {
+  margin: 2px 0;
+}
+
+.btn,
+.btn-secondary {
+  font: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px 18px;
+  background: var(--accent);
+  color: #fff;
+  letter-spacing: 0.06em;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  padding: 8px 14px;
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+}
+
+.status {
+  margin: 10px 0 0;
+  min-height: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status.error {
+  color: var(--error);
+}
+
+.stage {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+#preview,
+#result {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  /* La cuadricula deja ver donde acaba una foto clara sobre la banda blanca. */
+  background: repeating-conic-gradient(#2f2b2a 0% 25%, #262322 0% 50%) 50% / 20px 20px;
+}
+
+#preview {
+  max-height: 70vh;
+  width: auto;
+  touch-action: none;
+}
+
+.output {
+  max-width: 1180px;
+  margin: 24px auto 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  text-align: center;
+}
+
+.output #download {
+  max-width: 320px;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 20px 14px 48px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #preview {
+    max-height: 60vh;
+  }
+}

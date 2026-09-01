@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meme Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="top">
+      <h1>Meme Generator</h1>
+      <p>Banda con el texto arriba y la foto debajo · 1080 de ancho</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <h2>1 · Texto</h2>
+        <div class="field">
+          <label for="text">
+            Rótulo
+            <span class="muted small">· lo que envuelvas en *asteriscos* sale resaltado</span>
+          </label>
+          <textarea id="text" rows="4" placeholder="Escribe aquí el texto del meme"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="font">Tipografía</label>
+          <select id="font"></select>
+        </div>
+
+        <div class="field">
+          <label for="size">
+            Cuerpo <span class="muted small">· <span id="size-value">52</span> px</span>
+          </label>
+          <input type="range" id="size" min="26" max="84" step="1" value="52" />
+        </div>
+
+        <h2>2 · Imagen</h2>
+        <div id="drop" class="drop">
+          <input type="file" id="file" accept="image/*" hidden />
+          <p><strong>Arrastra una foto aquí</strong></p>
+          <p class="muted">o</p>
+          <button type="button" id="pick" class="btn-secondary">Elegir archivo…</button>
+          <p class="muted small" id="file-name">Ningún archivo seleccionado</p>
+        </div>
+
+        <h2>3 · Lienzo</h2>
+        <div class="field">
+          <label for="mode">Formato</label>
+          <select id="mode">
+            <option value="auto" selected>Alto libre · la foto entera</option>
+            <option value="fixed">1080 × 1350 · recorta la foto</option>
+          </select>
+          <p class="muted small" id="mode-help"></p>
+        </div>
+
+        <div class="field" id="zoom-field" hidden>
+          <label for="zoom">
+            Encuadre <span class="muted small">· arrastra la vista previa; rueda para el zoom</span>
+          </label>
+          <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" />
+        </div>
+
+        <h2>4 · Colores</h2>
+        <div class="colors">
+          <div class="field">
+            <label for="color-band">Banda</label>
+            <input type="color" id="color-band" value="#ffffff" />
+            <div class="swatches" data-for="color-band"></div>
+          </div>
+          <div class="field">
+            <label for="color-text">Texto</label>
+            <input type="color" id="color-text" value="#000000" />
+            <div class="swatches" data-for="color-text"></div>
+          </div>
+          <div class="field">
+            <label for="color-highlight">Resaltado</label>
+            <input type="color" id="color-highlight" value="#e11d2f" />
+            <div class="swatches" data-for="color-highlight"></div>
+          </div>
+        </div>
+
+        <button type="button" id="generate" class="btn">GENERA</button>
+        <p class="status" id="status"></p>
+      </section>
+
+      <section class="panel" id="preview-panel">
+        <h2>Vista previa</h2>
+        <div class="stage">
+          <canvas id="preview"></canvas>
+        </div>
+        <p class="muted small" id="preview-info"></p>
+      </section>
+    </main>
+
+    <section class="output" id="output" hidden>
+      <h2>Resultado</h2>
+      <canvas id="result"></canvas>
+      <p class="muted small" id="result-info"></p>
+      <button type="button" id="download" class="btn">Descargar PNG</button>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
