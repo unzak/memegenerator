@@ -7,18 +7,8 @@
 
 export const CANVAS_W = 1080;
 
-/**
- * Alto del lienzo en modo 4:5. La banda crece con el texto y la foto se deja
- * entera, asi que las dos cosas a la vez solo salen si el lienzo crece hacia
- * abajo. De ahi los dos modos: en `auto` manda la foto y el alto es libre; en
- * `fixed` manda el 1080x1350 y lo que cede es el encuadre de la foto.
- */
-export const CANVAS_H_FIXED = 1350;
-
-export type CanvasMode = "auto" | "fixed";
-
-/** Alto del hueco de la foto mientras no hay ninguna cargada. */
-export const PLACEHOLDER_H = 1080;
+/** 1080x1350 es el 4:5 de Facebook. El lienzo no cambia nunca. */
+export const CANVAS_H = 1350;
 
 /** Margenes de la banda. El lateral fija de paso el ancho de composicion. */
 export const BAND_PAD_X = 56;
@@ -101,5 +91,8 @@ export function fontById(id: string): Font {
   return FONTS.find((f) => f.id === id) ?? FONT_DEFAULT;
 }
 
-/** Paleta de la casa para los selectores de color. */
-export const SWATCHES = ["#ffffff", "#000000", "#e11d2f", "#ffd400", "#111111"];
+/**
+ * Paleta de la casa para los selectores de color. El rosa es el de Cabronazi,
+ * el mismo `#cc1c65` que en news-maker, medido alli sobre el logo original.
+ */
+export const SWATCHES = ["#ffffff", "#000000", "#cc1c65", "#e11d2f", "#111111"];

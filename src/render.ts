@@ -1,12 +1,10 @@
 import {
   BAND_PAD_Y,
-  CANVAS_H_FIXED,
+  CANVAS_H,
   CANVAS_W,
   CAP_RATIO,
   LINE_RATIO,
-  PLACEHOLDER_H,
   TEXT_MAX_W,
-  type CanvasMode,
   type Font,
 } from "./format.js";
 
@@ -17,7 +15,7 @@ export interface Segment {
 }
 
 export interface PhotoTransform {
-  /** 1 = encaje "cover" justo. Mas de 1 amplia. Solo cuenta en modo 4:5. */
+  /** 1 = encaje "cover" justo. Mas de 1 amplia la foto. */
   zoom: number;
   /** Desplazamiento en px de lienzo, respecto al encaje centrado. */
   offsetX: number;
@@ -28,9 +26,9 @@ export interface RenderOptions {
   photo: CanvasImageSource | null;
   photoSize: { width: number; height: number } | null;
   transform: PhotoTransform;
-  mode: CanvasMode;
   text: string;
   font: Font;
+  /** Tamaño de letra. Manda el: la banda se adapta a lo que ocupe. */
   fontSize: number;
   colorBand: string;
   colorText: string;
@@ -139,6 +137,8 @@ export interface Layout {
   height: number;
   /** Alto de la banda. 0 cuando no hay texto: entonces sale la foto sola. */
   bandH: number;
+  /** Tamaño de letra con el que se ha compuesto. */
+  fontSize: number;
   lineHeight: number;
   lines: Line[];
   /** Hueco reservado a la foto, debajo de la banda. */
@@ -156,39 +156,44 @@ export function computeLayout(
   ctx: CanvasRenderingContext2D,
   opts: RenderOptions,
 ): Layout {
-  setFont(ctx, opts.font, opts.fontSize);
+  const fontSize = opts.fontSize;
+  setFont(ctx, opts.font, fontSize);
   const lines = layoutLines(ctx, tokenize(parseSegments(opts.text)), TEXT_MAX_W);
-  const lineHeight = opts.fontSize * LINE_RATIO;
-  const bandH = lines.length > 0 ? Math.round(BAND_PAD_Y * 2 + lines.length * lineHeight) : 0;
+  const lineHeight = fontSize * LINE_RATIO;
+  // Manda el tamaño de letra: la banda se adapta a lo que ocupe el texto. El
+  // unico tope es el propio lienzo, que no se mueve.
+  const bandH =
+    lines.length > 0
+      ? Math.min(CANVAS_H, Math.round(BAND_PAD_Y * 2 + lines.length * lineHeight))
+      : 0;
 
-  // Alto natural de la foto a todo el ancho, que es lo que manda en modo auto.
-  const naturalH = opts.photoSize
-    ? Math.round((CANVAS_W * opts.photoSize.height) / opts.photoSize.width)
-    : PLACEHOLDER_H;
-
-  const height = opts.mode === "fixed" ? CANVAS_H_FIXED : bandH + naturalH;
-  const photoArea: Rect = { x: 0, y: bandH, w: CANVAS_W, h: Math.max(0, height - bandH) };
+  // El lienzo no se mueve: lo que la banda ocupa se lo quita a la foto.
+  const photoArea: Rect = { x: 0, y: bandH, w: CANVAS_W, h: Math.max(0, CANVAS_H - bandH) };
 
   let photo: Rect | null = null;
   if (opts.photoSize) {
-    if (opts.mode === "auto") {
-      // La foto se deja entera: encaja a lo ancho y el lienzo se estira.
-      photo = { x: 0, y: photoArea.y, w: CANVAS_W, h: naturalH };
-    } else {
-      // En 4:5 el hueco es el que es, asi que hay que recortar: encaje cover.
-      const scale = coverScale(opts.photoSize, photoArea, opts.transform.zoom);
-      const w = opts.photoSize.width * scale;
-      const h = opts.photoSize.height * scale;
-      photo = {
-        x: (photoArea.w - w) / 2 + opts.transform.offsetX,
-        y: photoArea.y + (photoArea.h - h) / 2 + opts.transform.offsetY,
-        w,
-        h,
-      };
-    }
+    // El hueco es el que es, asi que hay que recortar: encaje cover.
+    const scale = coverScale(opts.photoSize, photoArea, opts.transform.zoom);
+    const w = opts.photoSize.width * scale;
+    const h = opts.photoSize.height * scale;
+    photo = {
+      x: (photoArea.w - w) / 2 + opts.transform.offsetX,
+      y: photoArea.y + (photoArea.h - h) / 2 + opts.transform.offsetY,
+      w,
+      h,
+    };
   }
 
-  return { width: CANVAS_W, height, bandH, lineHeight, lines, photoArea, photo };
+  return {
+    width: CANVAS_W,
+    height: CANVAS_H,
+    bandH,
+    fontSize,
+    lineHeight,
+    lines,
+    photoArea,
+    photo,
+  };
 }
 
 function coverScale(
@@ -202,7 +207,7 @@ function coverScale(
 /**
  * Recorta el encuadre para que la foto siga cubriendo todo el hueco. Con el
  * encaje cover siempre sobra imagen por algun lado: eso es justo lo que se
- * puede desplazar, y ni un pixel mas. En modo auto no hay nada que recortar.
+ * puede desplazar, y ni un pixel mas.
  */
 export function clampPhotoOffset(
   photoSize: { width: number; height: number },
@@ -252,11 +257,11 @@ function drawBand(
   ctx.fillStyle = opts.colorBand;
   ctx.fillRect(0, 0, layout.width, layout.bandH);
 
-  setFont(ctx, opts.font, opts.fontSize);
+  setFont(ctx, opts.font, layout.fontSize);
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
 
-  const cap = opts.fontSize * CAP_RATIO;
+  const cap = layout.fontSize * CAP_RATIO;
   layout.lines.forEach((line, i) => {
     if (line.length === 0) return;
     // Cada linea se centra dentro de su caja, y el bloque queda centrado en la

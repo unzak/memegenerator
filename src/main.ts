@@ -1,5 +1,4 @@
 import {
-  CANVAS_H_FIXED,
   CANVAS_W,
   COLOR_BAND,
   COLOR_HIGHLIGHT,
@@ -11,7 +10,6 @@ import {
   ZOOM_MAX,
   ZOOM_MIN,
   fontById,
-  type CanvasMode,
 } from "./format.js";
 import {
   clampPhotoOffset,
@@ -36,9 +34,6 @@ const dropEl = need<HTMLDivElement>("drop");
 const fileEl = need<HTMLInputElement>("file");
 const pickEl = need<HTMLButtonElement>("pick");
 const fileNameEl = need<HTMLParagraphElement>("file-name");
-const modeEl = need<HTMLSelectElement>("mode");
-const modeHelpEl = need<HTMLParagraphElement>("mode-help");
-const zoomFieldEl = need<HTMLDivElement>("zoom-field");
 const zoomEl = need<HTMLInputElement>("zoom");
 const bandEl = need<HTMLInputElement>("color-band");
 const textColorEl = need<HTMLInputElement>("color-text");
@@ -66,7 +61,6 @@ interface State {
   photoSize: { width: number; height: number } | null;
   photoName: string;
   transform: PhotoTransform;
-  mode: CanvasMode;
 }
 
 const state: State = {
@@ -74,7 +68,6 @@ const state: State = {
   photoSize: null,
   photoName: "",
   transform: { zoom: 1, offsetX: 0, offsetY: 0 },
-  mode: "auto",
 };
 
 function options(): RenderOptions {
@@ -82,7 +75,6 @@ function options(): RenderOptions {
     photo: state.photo,
     photoSize: state.photoSize,
     transform: state.transform,
-    mode: state.mode,
     text: textEl.value,
     font: fontById(fontEl.value),
     fontSize: Number(sizeEl.value),
@@ -213,25 +205,65 @@ window.addEventListener("paste", (e) => {
   if (file) void loadFile(file);
 });
 
-// --- Encuadre (solo en 4:5, que es donde se recorta) ------------------------
+// --- Encuadre --------------------------------------------------------------
 
-function fixedMode(): boolean {
-  return state.mode === "fixed";
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
 
-function clamp(): void {
-  if (!state.photoSize || !fixedMode()) return;
+/** Del espacio de pantalla al del lienzo: la previa va escalada. */
+function canvasScale(): number {
+  return previewEl.width / previewEl.getBoundingClientRect().width;
+}
+
+/** Recorta el encuadre despues de cada gesto, para no dejarlo nunca invalido. */
+function clampOffset(): void {
+  if (!state.photoSize) return;
   const layout = computeLayout(previewCtx, options());
   clampPhotoOffset(state.photoSize, layout.photoArea, state.transform);
 }
 
+function setZoom(zoom: number): void {
+  state.transform.zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+  zoomEl.value = String(state.transform.zoom);
+  clampOffset();
+  draw();
+}
+
+zoomEl.addEventListener("input", () => setZoom(Number(zoomEl.value)));
+
+const pointers = new Map<number, { x: number; y: number }>();
 let dragging = false;
 let lastX = 0;
 let lastY = 0;
+/** Distancia y zoom con los que arranco el pellizco en curso. */
+let pinch: { dist: number; zoom: number } | null = null;
+
+/** Distancia y punto medio entre los dos primeros dedos. */
+function pinchGeometry(): { dist: number; mx: number; my: number } | null {
+  const [a, b] = [...pointers.values()];
+  if (!a || !b) return null;
+  return {
+    dist: Math.hypot(a.x - b.x, a.y - b.y),
+    mx: (a.x + b.x) / 2,
+    my: (a.y + b.y) / 2,
+  };
+}
 
 previewEl.addEventListener("pointerdown", (e) => {
-  if (!state.photo || !fixedMode()) return;
+  if (!state.photo) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   dragging = true;
+
+  if (pointers.size >= 2) {
+    const g = pinchGeometry();
+    if (!g) return;
+    pinch = { dist: g.dist, zoom: state.transform.zoom };
+    lastX = g.mx;
+    lastY = g.my;
+    return;
+  }
+
   lastX = e.clientX;
   lastY = e.clientY;
   previewEl.setPointerCapture(e.pointerId);
@@ -239,60 +271,75 @@ previewEl.addEventListener("pointerdown", (e) => {
 
 previewEl.addEventListener("pointermove", (e) => {
   if (!dragging) return;
-  // Del espacio de pantalla al del lienzo: la previa va escalada.
-  const scale = previewEl.width / previewEl.getBoundingClientRect().width;
-  state.transform.offsetX += (e.clientX - lastX) * scale;
-  state.transform.offsetY += (e.clientY - lastY) * scale;
+  if (pointers.has(e.pointerId)) {
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  }
+
+  const s = canvasScale();
+
+  if (pinch && pointers.size >= 2) {
+    const g = pinchGeometry();
+    if (!g || pinch.dist === 0) return;
+    state.transform.zoom = clamp(pinch.zoom * (g.dist / pinch.dist), ZOOM_MIN, ZOOM_MAX);
+    zoomEl.value = String(state.transform.zoom);
+    // El punto medio tambien arrastra, que es lo que espera el dedo: se coloca
+    // y se dimensiona en un solo gesto.
+    state.transform.offsetX += (g.mx - lastX) * s;
+    state.transform.offsetY += (g.my - lastY) * s;
+    lastX = g.mx;
+    lastY = g.my;
+    clampOffset();
+    draw();
+    return;
+  }
+
+  state.transform.offsetX += (e.clientX - lastX) * s;
+  state.transform.offsetY += (e.clientY - lastY) * s;
   lastX = e.clientX;
   lastY = e.clientY;
-  clamp();
+  clampOffset();
   draw();
 });
 
-for (const type of ["pointerup", "pointercancel"]) {
-  previewEl.addEventListener(type, () => {
-    dragging = false;
+for (const type of ["pointerup", "pointercancel"] as const) {
+  previewEl.addEventListener(type, (e) => {
+    pointers.delete(e.pointerId);
+    pinch = null;
+    if (pointers.size === 1) {
+      // Al levantar un dedo, seguir arrastrando con el que queda en vez de dar
+      // un salto la proxima vez que se mueva.
+      const [p] = [...pointers.values()];
+      if (p) {
+        lastX = p.x;
+        lastY = p.y;
+      }
+    } else if (pointers.size === 0) {
+      dragging = false;
+    }
   });
 }
+
+/**
+ * Suavidad de la rueda. Una muesca tipica manda deltaY 100, asi que con 2000
+ * sale un ~5% por muesca. Cuanto mas alto, mas progresivo.
+ */
+const WHEEL_DIVISOR = 2000;
+/** Tope por evento, para que un golpe fuerte de rueda no pegue un salto. */
+const WHEEL_MAX_DELTA = 120;
 
 previewEl.addEventListener(
   "wheel",
   (e) => {
-    if (!state.photo || !fixedMode()) return;
+    if (!state.photo) return;
     e.preventDefault();
-    const step = e.deltaY < 0 ? 1.05 : 1 / 1.05;
-    setZoom(state.transform.zoom * step);
+    // deltaMode: 0 = px, 1 = lineas (Firefox), 2 = paginas.
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
+    const delta = clamp(e.deltaY * unit, -WHEEL_MAX_DELTA, WHEEL_MAX_DELTA);
+    // Exponencial, para que el paso se note igual en cualquier escala.
+    setZoom(state.transform.zoom * Math.exp(-delta / WHEEL_DIVISOR));
   },
   { passive: false },
 );
-
-function setZoom(zoom: number): void {
-  state.transform.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
-  zoomEl.value = String(state.transform.zoom);
-  clamp();
-  draw();
-}
-
-zoomEl.addEventListener("input", () => setZoom(Number(zoomEl.value)));
-
-// --- Modo de lienzo --------------------------------------------------------
-
-function syncMode(): void {
-  state.mode = modeEl.value === "fixed" ? "fixed" : "auto";
-  zoomFieldEl.hidden = !fixedMode();
-  modeHelpEl.textContent = fixedMode()
-    ? `Alto fijo de ${CANVAS_H_FIXED} px: la banda se come el hueco de la foto, así que la foto se recorta.`
-    : "La foto se deja entera y el lienzo crece hacia abajo con el texto.";
-  if (fixedMode()) {
-    clamp();
-  } else {
-    state.transform = { zoom: 1, offsetX: 0, offsetY: 0 };
-    zoomEl.value = "1";
-  }
-  draw();
-}
-
-modeEl.addEventListener("change", syncMode);
 
 // --- Dibujo ----------------------------------------------------------------
 
@@ -353,5 +400,4 @@ bandEl.value = COLOR_BAND;
 textColorEl.value = COLOR_TEXT;
 highlightEl.value = COLOR_HIGHLIGHT;
 previewEl.width = CANVAS_W;
-syncMode();
 void ensureFont().then(draw);
