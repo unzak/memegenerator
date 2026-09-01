@@ -125,37 +125,6 @@ input[type="range"] {
   accent-color: var(--accent);
 }
 
-input[type="color"] {
-  width: 100%;
-  height: 38px;
-  padding: 2px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.colors {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.swatches {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.swatch {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 0;
-  cursor: pointer;
-}
-
 .drop {
   border: 1px dashed var(--line);
   border-radius: var(--radius);
@@ -171,14 +140,6 @@ input[type="color"] {
 
 .drop p {
   margin: 2px 0;
-}
-
-.drop-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin: 6px 0 8px;
 }
 
 .btn,

@@ -3,16 +3,13 @@ import {
   COLOR_BAND,
   COLOR_HIGHLIGHT,
   COLOR_TEXT,
-  FONTS,
-  FONT_DEFAULT,
+  COLORS,
+  FONT,
   FONT_SIZE,
   FONT_SIZE_MAX,
   FONT_SIZE_MIN,
-  SWATCHES,
   ZOOM_MAX,
   ZOOM_MIN,
-  fontById,
-  type Font,
 } from "./format.js";
 import {
   clampPhotoOffset,
@@ -30,19 +27,17 @@ function need<T extends Element>(id: string): T {
 }
 
 const textEl = need<HTMLTextAreaElement>("text");
-const fontEl = need<HTMLSelectElement>("font");
 const alignEl = need<HTMLSelectElement>("align");
 const sizeEl = need<HTMLInputElement>("size");
 const sizeValueEl = need<HTMLSpanElement>("size-value");
 const dropEl = need<HTMLDivElement>("drop");
 const fileEl = need<HTMLInputElement>("file");
 const pickEl = need<HTMLButtonElement>("pick");
-const pasteEl = need<HTMLButtonElement>("paste");
 const fileNameEl = need<HTMLParagraphElement>("file-name");
 const zoomEl = need<HTMLInputElement>("zoom");
-const bandEl = need<HTMLInputElement>("color-band");
-const textColorEl = need<HTMLInputElement>("color-text");
-const highlightEl = need<HTMLInputElement>("color-highlight");
+const bandEl = need<HTMLSelectElement>("color-band");
+const textColorEl = need<HTMLSelectElement>("color-text");
+const highlightEl = need<HTMLSelectElement>("color-highlight");
 const generateEl = need<HTMLButtonElement>("generate");
 const statusEl = need<HTMLParagraphElement>("status");
 const previewEl = need<HTMLCanvasElement>("preview");
@@ -82,7 +77,7 @@ function options(): RenderOptions {
     transform: state.transform,
     text: textEl.value,
     align: alignEl.value === "left" ? "left" : "center",
-    font: fontById(fontEl.value),
+    font: FONT,
     fontSize: Number(sizeEl.value),
     colorBand: bandEl.value,
     colorText: textColorEl.value,
@@ -95,77 +90,36 @@ function setStatus(message: string, kind: "" | "error" = ""): void {
   statusEl.className = kind === "error" ? "status error" : "status";
 }
 
-// --- Tipografias -----------------------------------------------------------
-
-for (const font of FONTS) {
-  const opt = document.createElement("option");
-  opt.value = font.id;
-  opt.textContent = font.label;
-  fontEl.append(opt);
-}
-fontEl.value = FONT_DEFAULT.id;
+// --- Tipografia ------------------------------------------------------------
 
 /**
- * True si la familia esta en el equipo. Se mide un texto con ella y con tres
- * genericas: si el ancho no cambia respecto a ninguna, es que no existe y el
- * navegador esta cayendo en la de respaldo.
- *
- * Ojo con lo que NO detecta: Windows sustituye Helvetica por Arial a nivel de
- * sistema, y ademas las dos son metricamente identicas a proposito, asi que
- * ninguna medida de anchura puede distinguirlas. Esto solo pilla las familias
- * que faltan del todo, sin sustituta.
- */
-function fontInstalled(font: Font): boolean {
-  const probe = "MMMWWWmmmwww@#$%";
-  return ["monospace", "serif", "sans-serif"].some((generic) => {
-    previewCtx.font = `${font.weight} 72px ${generic}`;
-    const base = previewCtx.measureText(probe).width;
-    previewCtx.font = `${font.weight} 72px "${font.family}", ${generic}`;
-    return previewCtx.measureText(probe).width !== base;
-  });
-}
-
-/**
- * Espera a la fuente elegida antes de medir. Sin esto, la primera pasada mide
+ * Espera a que cargue SF Pro antes de medir. Sin esto, la primera pasada mide
  * con la de respaldo y el texto sale con un ajuste que no corresponde.
  */
 async function ensureFont(): Promise<void> {
-  const font = fontById(fontEl.value);
-  if (font.webfont) {
-    try {
-      await document.fonts.load(`${font.weight} 64px ${font.stack}`);
-      await document.fonts.ready;
-    } catch {
-      setStatus(`No se pudo cargar ${font.label}; se usará una de respaldo.`, "error");
-      return;
-    }
-  }
-  if (!fontInstalled(font)) {
-    setStatus(
-      `${font.label} no está instalada en este equipo: se rotulará con la de respaldo.`,
-      "error",
-    );
-  } else {
-    setStatus("");
+  try {
+    await document.fonts.load(`${FONT.weight} 64px ${FONT.stack}`);
+    await document.fonts.ready;
+  } catch {
+    setStatus("No se pudo cargar SF Pro; se usará una de respaldo.", "error");
   }
 }
 
 // --- Colores ---------------------------------------------------------------
 
-for (const row of document.querySelectorAll<HTMLDivElement>(".swatches")) {
-  const target = need<HTMLInputElement>(row.dataset.for ?? "");
-  for (const color of SWATCHES) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "swatch";
-    btn.style.background = color;
-    btn.title = color;
-    btn.addEventListener("click", () => {
-      target.value = color;
-      draw();
-    });
-    row.append(btn);
+for (const [select, inicial] of [
+  [bandEl, COLOR_BAND],
+  [textColorEl, COLOR_TEXT],
+  [highlightEl, COLOR_HIGHLIGHT],
+] as const) {
+  for (const { label, hex } of COLORS) {
+    const opt = document.createElement("option");
+    opt.value = hex;
+    opt.textContent = label;
+    select.append(opt);
   }
+  select.value = inicial;
+  select.addEventListener("change", draw);
 }
 
 // --- Imagen ----------------------------------------------------------------
@@ -240,34 +194,6 @@ dropEl.addEventListener("drop", (e) => {
 window.addEventListener("paste", (e) => {
   const file = e.clipboardData?.files?.[0];
   if (file) void loadFile(file);
-});
-
-/**
- * Boton de pegar. A diferencia de Ctrl+V, esto lee el portapapeles por su
- * cuenta, asi que hace falta `navigator.clipboard.read`, un origen seguro
- * (https o localhost) y el permiso del navegador. Si algo de eso falta, se dice
- * y se remite a Ctrl+V, que funciona siempre.
- */
-pasteEl.addEventListener("click", () => {
-  void (async () => {
-    if (!navigator.clipboard?.read) {
-      setStatus("Este navegador no deja leer el portapapeles; usa Ctrl+V.", "error");
-      return;
-    }
-    try {
-      for (const item of await navigator.clipboard.read()) {
-        const type = item.types.find((t) => t.startsWith("image/"));
-        if (!type) continue;
-        const blob = await item.getType(type);
-        const ext = type.split("/")[1] ?? "png";
-        await loadFile(new File([blob], `portapapeles.${ext}`, { type }));
-        return;
-      }
-      setStatus("No hay ninguna imagen copiada en el portapapeles.", "error");
-    } catch {
-      setStatus("No se pudo leer el portapapeles: da permiso al navegador o usa Ctrl+V.", "error");
-    }
-  })();
 });
 
 // --- Encuadre --------------------------------------------------------------
@@ -458,15 +384,11 @@ function draw(): void {
   previewInfoEl.textContent = `${layout.width} × ${layout.height} px · ${band}`;
 }
 
-for (const el of [textEl, sizeEl, bandEl, textColorEl, highlightEl]) {
+for (const el of [textEl, sizeEl]) {
   el.addEventListener("input", draw);
 }
 
 alignEl.addEventListener("change", draw);
-
-fontEl.addEventListener("change", () => {
-  void ensureFont().then(draw);
-});
 
 // --- Salida ----------------------------------------------------------------
 
@@ -504,8 +426,5 @@ downloadEl.addEventListener("click", () => {
 
 textEl.value = "";
 sizeEl.value = String(FONT_SIZE);
-bandEl.value = COLOR_BAND;
-textColorEl.value = COLOR_TEXT;
-highlightEl.value = COLOR_HIGHLIGHT;
 previewEl.width = CANVAS_W;
 void ensureFont().then(draw);

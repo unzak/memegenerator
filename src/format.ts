@@ -40,92 +40,42 @@ export const ZOOM_MIN = 1;
 export const ZOOM_MAX = 3;
 
 export interface Font {
-  id: string;
-  label: string;
-  /** Nombre a secas de la familia, para comprobar si esta instalada. */
+  /** Nombre a secas de la familia, para comprobar si esta cargada. */
   family: string;
-  /** Pila completa, con respaldos por si la familia no esta instalada. */
+  /** Pila completa, con respaldo por si la familia no llega a cargar. */
   stack: string;
   weight: number;
-  /** True si no es del sistema y hay que esperar a que se descargue. */
-  webfont: boolean;
 }
 
 /**
- * Las tipografias del rotulo. Las del sistema dependen de lo que tenga cada
- * equipo; Inter viene de Google Fonts y SF Pro va servida por el repo. Ojo con
- * Helvetica: en Windows no viene instalada y cae en Arial.
+ * La tipografia del rotulo. SF Pro Display Medium, servida por el propio repo
+ * en `src/assets` y declarada en `style.css`, asi que sale igual en cualquier
+ * equipo sin depender de lo que tenga instalado.
  *
- * SF Pro es la unica que no es negrita: Medium (500) es bastante mas fina que
- * el resto, asi que el rotulo se ve mas ligero con ella.
- *
- * Arial Black e Impact son familias que ya son gruesas de por si, asi que van
- * a peso 400: pedirles 700 haria que el navegador las engordase encima.
+ * Medium es peso 500, mas fina que una negrita: el rotulo se ve ligero a
+ * proposito.
  */
-export const FONTS: Font[] = [
-  {
-    id: "helvetica",
-    label: "Helvetica Bold",
-    family: "Helvetica",
-    stack: 'Helvetica, "Helvetica Neue", Arial, sans-serif',
-    weight: 700,
-    webfont: false,
-  },
-  {
-    id: "arial",
-    label: "Arial Bold",
-    family: "Arial",
-    stack: "Arial, Helvetica, sans-serif",
-    weight: 700,
-    webfont: false,
-  },
-  {
-    id: "arial-black",
-    label: "Arial Black",
-    family: "Arial Black",
-    stack: '"Arial Black", Gadget, sans-serif',
-    weight: 400,
-    webfont: false,
-  },
-  {
-    id: "inter",
-    label: "Inter Bold",
-    family: "Inter",
-    stack: '"Inter", system-ui, sans-serif',
-    weight: 700,
-    webfont: true,
-  },
-  {
-    id: "sfpro",
-    label: "SF Pro Medium",
-    family: "SF Pro Display",
-    stack: '"SF Pro Display", system-ui, sans-serif',
-    weight: 500,
-    webfont: true,
-  },
-  {
-    id: "impact",
-    label: "Impact",
-    family: "Impact",
-    stack: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
-    weight: 400,
-    webfont: false,
-  },
+export const FONT: Font = {
+  family: "SF Pro Display",
+  stack: '"SF Pro Display", system-ui, sans-serif',
+  weight: 500,
+};
+
+
+export interface Swatch {
+  label: string;
+  hex: string;
+}
+
+/**
+ * Paleta de la casa. El rosa es el de Cabronazi y el verde el de
+ * Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` que en news-maker, medidos
+ * alli sobre los logos originales.
+ */
+export const COLORS: Swatch[] = [
+  { label: "Blanco", hex: "#ffffff" },
+  { label: "Negro", hex: "#000000" },
+  { label: "Rosa Cabronazi", hex: "#cc1c65" },
+  { label: "Rojo", hex: "#e11d2f" },
+  { label: "Verde Cabrodeportes", hex: "#00ce5c" },
 ];
-
-/**
- * Inter Bold. Es la unica que se descarga, asi que sale igual en cualquier
- * equipo; las del sistema dependen de lo que tenga instalado cada uno.
- */
-export const FONT_DEFAULT = FONTS.find((f) => f.id === "inter") ?? FONTS[0]!;
-
-export function fontById(id: string): Font {
-  return FONTS.find((f) => f.id === id) ?? FONT_DEFAULT;
-}
-
-/**
- * Paleta de la casa para los selectores de color. El rosa es el de Cabronazi y
- * el verde el de Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` que en
- * news-maker, medidos alli sobre los logos originales.
- */
-export const SWATCHES = ["#ffffff", "#000000", "#cc1c65", "#e11d2f", "#00ce5c"];

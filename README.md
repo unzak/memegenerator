@@ -15,34 +15,27 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    bloque sigue centrado en el lienzo y son las líneas las que se alinean entre
    sí, tomando como referencia la más larga: nunca se pega al margen salvo que
    esa línea ocupe todo el ancho de composición.
-2. Elige **tipografía** y **tamaño de letra**. Manda el tamaño: **la banda se
-   adapta** a lo que ocupe el texto, no hay un alto reservado de antemano.
+2. Ajusta el **tamaño de letra**. Manda el tamaño: **la banda se adapta** a lo
+   que ocupe el texto, no hay un alto reservado de antemano.
 
-   Hay seis: Helvetica Bold, Arial Bold, Arial Black, Inter Bold, SF Pro Medium
-   e Impact. Inter viene de Google Fonts y SF Pro la sirve el propio repo; las
-   otras cuatro son del sistema y dependen de lo que tenga instalado cada
-   equipo. **Inter Bold va por defecto**, precisamente porque al descargarse
-   sale igual en todas partes.
-
-   SF Pro es la única que no es negrita — Medium (500) —, así que el rótulo se
-   ve bastante más ligero con ella.
+   La tipografía es siempre **SF Pro Display Medium**, que sirve el propio repo,
+   así que sale igual en cualquier equipo sin depender de lo que tenga
+   instalado. No es una negrita — Medium es peso 500 —, así que el rótulo se ve
+   ligero a propósito.
 
    **Helvetica solo sale como Helvetica donde esté instalada**, que en la
    práctica es Mac. Windows la sustituye por Arial a nivel de sistema, y como
    las dos son métricamente idénticas a propósito, el resultado es exactamente
    el mismo que «Arial Bold» y no hay forma de detectarlo desde el navegador.
-3. Arrastra la **foto**, elígela con el botón, o **pégala**: con **Ctrl+V** en
-   cualquier parte de la página, o con el botón «Pegar del portapapeles». Los
-   dos caminos no son iguales: Ctrl+V recibe la imagen con el propio evento y
-   funciona siempre, mientras que el botón lee el portapapeles por su cuenta y
-   necesita permiso del navegador y un origen seguro. Si no lo consigue, lo
-   dice y te remite a Ctrl+V.
+3. Arrastra la **foto**, elígela con el botón, o pégala con **Ctrl+V** en
+   cualquier parte de la página. El atajo sigue funcionando aunque no se
+   anuncie en el panel.
 4. Ajusta el **encuadre**. Como el lienzo no se mueve, lo que la banda ocupa se
    lo quita al hueco de la foto, y la foto se recorta para llenarlo. El
    deslizador hace zoom, y arrastrando sobre la vista previa la mueves.
-5. Cambia los **colores** si quieres: banda, texto y resaltado, cada uno con la
-   paleta de la casa además del selector libre. El rosa es el de Cabronazi, el
-   mismo `#cc1c65` de news-maker.
+5. Cambia los **colores** si quieres: banda, texto y resaltado, cada uno con un
+   desplegable de la paleta de la casa. El rosa es el de Cabronazi y el verde el
+   de Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` de news-maker.
 6. **GENERA**, y abajo aparece la imagen con el botón de descarga.
 
 La **rueda del ratón** y el **pellizco de dos dedos** actúan sobre lo que haya
@@ -85,7 +78,7 @@ despliega a Pages en cada push a `main`.
 | Archivo | Qué hay dentro |
 | --- | --- |
 | `src/assets/` | La SF Pro, reducida a Latin y en woff2 (54 KB). |
-| `src/format.ts` | Las medidas, las tipografías y la paleta. Es lo único que hay que tocar para cambiar el diseño. |
+| `src/format.ts` | Las medidas, la tipografía y la paleta. Es lo único que hay que tocar para cambiar el diseño. |
 | `src/render.ts` | El ajuste del texto y el dibujo sobre el lienzo. No toca el DOM. |
 | `src/main.ts` | La interfaz: carga de foto, encuadre, colores y descarga. |
 
