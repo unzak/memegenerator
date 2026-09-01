@@ -29,6 +29,19 @@
         </div>
 
         <div class="field">
+          <label for="align">Alineación</label>
+          <select id="align">
+            <option value="center" selected>Centrado</option>
+            <option value="left">A la izquierda</option>
+          </select>
+          <p class="muted small">
+            A la izquierda, el bloque sigue centrado y las líneas se alinean entre sí
+            por la línea más larga. Solo llega al margen si esa línea ocupa todo
+            el ancho.
+          </p>
+        </div>
+
+        <div class="field">
           <label for="font">Tipografía</label>
           <select id="font"></select>
           <p class="muted small">
@@ -51,16 +64,25 @@
           <input type="file" id="file" accept="image/*" hidden />
           <p><strong>Arrastra una foto aquí</strong></p>
           <p class="muted">o</p>
-          <button type="button" id="pick" class="btn-secondary">Elegir archivo…</button>
+          <div class="drop-actions">
+            <button type="button" id="pick" class="btn-secondary">Elegir archivo…</button>
+            <button type="button" id="paste" class="btn-secondary">Pegar del portapapeles</button>
+          </div>
+          <p class="muted small">También puedes pegar con <strong>Ctrl+V</strong> en cualquier parte.</p>
           <p class="muted small" id="file-name">Ningún archivo seleccionado</p>
         </div>
 
         <h2>3 · Encuadre</h2>
         <div class="field">
           <label for="zoom">
-            Zoom <span class="muted small">· arrastra la vista previa; rueda para el zoom</span>
+            Zoom <span class="muted small">· arrastra la vista previa para mover la foto</span>
           </label>
           <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" />
+          <p class="muted small">
+            La rueda del ratón y el pellizco actúan sobre lo que haya debajo: encima
+            de la foto hacen zoom de la foto, y encima del rótulo cambian el tamaño
+            de la letra.
+          </p>
           <p class="muted small">
             El lienzo es siempre 1080 × 1350, así que la banda le quita alto al hueco
             de la foto y la foto se recorta para llenarlo.

@@ -27,6 +27,7 @@ export interface RenderOptions {
   photoSize: { width: number; height: number } | null;
   transform: PhotoTransform;
   text: string;
+  align: Align;
   font: Font;
   /** Tamaño de letra. Manda el: la banda se adapta a lo que ocupe. */
   fontSize: number;
@@ -34,6 +35,14 @@ export interface RenderOptions {
   colorText: string;
   colorHighlight: string;
 }
+
+/**
+ * Alineacion del rotulo. En `left` no se pega al margen del lienzo: el bloque
+ * se centra y las lineas se alinean entre si por la izquierda, tomando como
+ * referencia la linea mas larga. Solo llega al margen cuando esa linea ocupa
+ * todo el ancho de composicion.
+ */
+export type Align = "center" | "left";
 
 export interface Rect {
   x: number;
@@ -262,12 +271,19 @@ function drawBand(
   ctx.textBaseline = "alphabetic";
 
   const cap = layout.fontSize * CAP_RATIO;
+
+  // Alineado a la izquierda, el bloque entero se centra y todas las lineas
+  // arrancan donde arranca la mas larga.
+  const widths = layout.lines.map((line) => lineWidth(ctx, line));
+  const blockW = Math.max(0, ...widths);
+  const blockX = (layout.width - blockW) / 2;
+
   layout.lines.forEach((line, i) => {
     if (line.length === 0) return;
     // Cada linea se centra dentro de su caja, y el bloque queda centrado en la
     // banda porque los margenes de arriba y abajo son iguales.
     const baseline = BAND_PAD_Y + i * layout.lineHeight + layout.lineHeight / 2 + cap / 2;
-    let x = (layout.width - lineWidth(ctx, line)) / 2;
+    let x = opts.align === "left" ? blockX : (layout.width - (widths[i] ?? 0)) / 2;
     for (const token of line) {
       ctx.fillStyle = token.highlight ? opts.colorHighlight : opts.colorText;
       ctx.fillText(token.text, x, baseline);

@@ -6,6 +6,8 @@ import {
   FONTS,
   FONT_DEFAULT,
   FONT_SIZE,
+  FONT_SIZE_MAX,
+  FONT_SIZE_MIN,
   SWATCHES,
   ZOOM_MAX,
   ZOOM_MIN,
@@ -29,11 +31,13 @@ function need<T extends Element>(id: string): T {
 
 const textEl = need<HTMLTextAreaElement>("text");
 const fontEl = need<HTMLSelectElement>("font");
+const alignEl = need<HTMLSelectElement>("align");
 const sizeEl = need<HTMLInputElement>("size");
 const sizeValueEl = need<HTMLSpanElement>("size-value");
 const dropEl = need<HTMLDivElement>("drop");
 const fileEl = need<HTMLInputElement>("file");
 const pickEl = need<HTMLButtonElement>("pick");
+const pasteEl = need<HTMLButtonElement>("paste");
 const fileNameEl = need<HTMLParagraphElement>("file-name");
 const zoomEl = need<HTMLInputElement>("zoom");
 const bandEl = need<HTMLInputElement>("color-band");
@@ -77,6 +81,7 @@ function options(): RenderOptions {
     photoSize: state.photoSize,
     transform: state.transform,
     text: textEl.value,
+    align: alignEl.value === "left" ? "left" : "center",
     font: fontById(fontEl.value),
     fontSize: Number(sizeEl.value),
     colorBand: bandEl.value,
@@ -229,11 +234,40 @@ dropEl.addEventListener("drop", (e) => {
   if (file) void loadFile(file);
 });
 
-// Pegar desde el portapapeles: es lo mas rapido cuando la foto viene de una
-// captura o de otra pestaña.
+// Pegar con Ctrl+V en cualquier parte: es lo mas rapido cuando la foto viene
+// de una captura o de otra pestaña. Aqui la imagen llega con el evento, sin
+// pedir permiso a nadie.
 window.addEventListener("paste", (e) => {
   const file = e.clipboardData?.files?.[0];
   if (file) void loadFile(file);
+});
+
+/**
+ * Boton de pegar. A diferencia de Ctrl+V, esto lee el portapapeles por su
+ * cuenta, asi que hace falta `navigator.clipboard.read`, un origen seguro
+ * (https o localhost) y el permiso del navegador. Si algo de eso falta, se dice
+ * y se remite a Ctrl+V, que funciona siempre.
+ */
+pasteEl.addEventListener("click", () => {
+  void (async () => {
+    if (!navigator.clipboard?.read) {
+      setStatus("Este navegador no deja leer el portapapeles; usa Ctrl+V.", "error");
+      return;
+    }
+    try {
+      for (const item of await navigator.clipboard.read()) {
+        const type = item.types.find((t) => t.startsWith("image/"));
+        if (!type) continue;
+        const blob = await item.getType(type);
+        const ext = type.split("/")[1] ?? "png";
+        await loadFile(new File([blob], `portapapeles.${ext}`, { type }));
+        return;
+      }
+      setStatus("No hay ninguna imagen copiada en el portapapeles.", "error");
+    } catch {
+      setStatus("No se pudo leer el portapapeles: da permiso al navegador o usa Ctrl+V.", "error");
+    }
+  })();
 });
 
 // --- Encuadre --------------------------------------------------------------
@@ -254,6 +288,28 @@ function clampOffset(): void {
   clampPhotoOffset(state.photoSize, layout.photoArea, state.transform);
 }
 
+/** Del espacio de pantalla al del lienzo. */
+function toCanvas(clientX: number, clientY: number): { x: number; y: number } {
+  const rect = previewEl.getBoundingClientRect();
+  const s = canvasScale();
+  return { x: (clientX - rect.left) * s, y: (clientY - rect.top) * s };
+}
+
+type Target = "band" | "photo";
+
+/** Que hay bajo el puntero. Decide a que afecta cada gesto. */
+function targetAt(clientX: number, clientY: number): Target | null {
+  const layout = computeLayout(previewCtx, options());
+  const p = toCanvas(clientX, clientY);
+  if (layout.bandH > 0 && p.y >= 0 && p.y < layout.bandH) return "band";
+  return state.photo ? "photo" : null;
+}
+
+function setFontSize(size: number): void {
+  sizeEl.value = String(Math.round(clamp(size, FONT_SIZE_MIN, FONT_SIZE_MAX)));
+  draw();
+}
+
 function setZoom(zoom: number): void {
   state.transform.zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
   zoomEl.value = String(state.transform.zoom);
@@ -264,11 +320,12 @@ function setZoom(zoom: number): void {
 zoomEl.addEventListener("input", () => setZoom(Number(zoomEl.value)));
 
 const pointers = new Map<number, { x: number; y: number }>();
-let dragging = false;
 let lastX = 0;
 let lastY = 0;
-/** Distancia y zoom con los que arranco el pellizco en curso. */
-let pinch: { dist: number; zoom: number } | null = null;
+/** A que afecta el gesto en curso: al rotulo o a la foto. */
+let target: Target | null = null;
+/** Medidas con las que arranco el pellizco en curso. */
+let pinch: { dist: number; zoom: number; fontSize: number } | null = null;
 
 /** Distancia y punto medio entre los dos primeros dedos. */
 function pinchGeometry(): { dist: number; mx: number; my: number } | null {
@@ -282,54 +339,64 @@ function pinchGeometry(): { dist: number; mx: number; my: number } | null {
 }
 
 previewEl.addEventListener("pointerdown", (e) => {
-  if (!state.photo) return;
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  dragging = true;
 
   if (pointers.size >= 2) {
     const g = pinchGeometry();
     if (!g) return;
-    pinch = { dist: g.dist, zoom: state.transform.zoom };
+    // El destino lo decide el punto medio: pellizcar sobre el rotulo cambia el
+    // cuerpo de la letra, y en la foto hace zoom de la foto.
+    target = targetAt(g.mx, g.my);
+    if (!target) return;
+    pinch = { dist: g.dist, zoom: state.transform.zoom, fontSize: Number(sizeEl.value) };
     lastX = g.mx;
     lastY = g.my;
     return;
   }
 
+  target = targetAt(e.clientX, e.clientY);
+  if (!target) return;
   lastX = e.clientX;
   lastY = e.clientY;
   previewEl.setPointerCapture(e.pointerId);
 });
 
 previewEl.addEventListener("pointermove", (e) => {
-  if (!dragging) return;
   if (pointers.has(e.pointerId)) {
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   }
+  if (!target) return;
 
   const s = canvasScale();
 
   if (pinch && pointers.size >= 2) {
     const g = pinchGeometry();
     if (!g || pinch.dist === 0) return;
-    state.transform.zoom = clamp(pinch.zoom * (g.dist / pinch.dist), ZOOM_MIN, ZOOM_MAX);
-    zoomEl.value = String(state.transform.zoom);
-    // El punto medio tambien arrastra, que es lo que espera el dedo: se coloca
-    // y se dimensiona en un solo gesto.
-    state.transform.offsetX += (g.mx - lastX) * s;
-    state.transform.offsetY += (g.my - lastY) * s;
+    const ratio = g.dist / pinch.dist;
+    if (target === "band") {
+      setFontSize(pinch.fontSize * ratio);
+    } else {
+      state.transform.zoom = clamp(pinch.zoom * ratio, ZOOM_MIN, ZOOM_MAX);
+      zoomEl.value = String(state.transform.zoom);
+      // El punto medio tambien arrastra, que es lo que espera el dedo: se
+      // coloca y se dimensiona en un solo gesto.
+      state.transform.offsetX += (g.mx - lastX) * s;
+      state.transform.offsetY += (g.my - lastY) * s;
+      draw();
+    }
     lastX = g.mx;
     lastY = g.my;
-    clampOffset();
-    draw();
     return;
   }
 
-  state.transform.offsetX += (e.clientX - lastX) * s;
-  state.transform.offsetY += (e.clientY - lastY) * s;
-  lastX = e.clientX;
-  lastY = e.clientY;
-  clampOffset();
-  draw();
+  // Arrastrar solo mueve la foto: el rotulo va siempre centrado en su banda.
+  if (target === "photo") {
+    state.transform.offsetX += (e.clientX - lastX) * s;
+    state.transform.offsetY += (e.clientY - lastY) * s;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    draw();
+  }
 });
 
 for (const type of ["pointerup", "pointercancel"] as const) {
@@ -345,7 +412,7 @@ for (const type of ["pointerup", "pointercancel"] as const) {
         lastY = p.y;
       }
     } else if (pointers.size === 0) {
-      dragging = false;
+      target = null;
     }
   });
 }
@@ -358,16 +425,20 @@ const WHEEL_DIVISOR = 2000;
 /** Tope por evento, para que un golpe fuerte de rueda no pegue un salto. */
 const WHEEL_MAX_DELTA = 120;
 
+/** Rueda del raton: actua sobre lo que haya bajo el cursor. */
 previewEl.addEventListener(
   "wheel",
   (e) => {
-    if (!state.photo) return;
+    const hit = targetAt(e.clientX, e.clientY);
+    if (!hit) return;
     e.preventDefault();
     // deltaMode: 0 = px, 1 = lineas (Firefox), 2 = paginas.
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
     const delta = clamp(e.deltaY * unit, -WHEEL_MAX_DELTA, WHEEL_MAX_DELTA);
     // Exponencial, para que el paso se note igual en cualquier escala.
-    setZoom(state.transform.zoom * Math.exp(-delta / WHEEL_DIVISOR));
+    const factor = Math.exp(-delta / WHEEL_DIVISOR);
+    if (hit === "band") setFontSize(Number(sizeEl.value) * factor);
+    else setZoom(state.transform.zoom * factor);
   },
   { passive: false },
 );
@@ -390,6 +461,8 @@ function draw(): void {
 for (const el of [textEl, sizeEl, bandEl, textColorEl, highlightEl]) {
   el.addEventListener("input", draw);
 }
+
+alignEl.addEventListener("change", draw);
 
 fontEl.addEventListener("change", () => {
   void ensureFont().then(draw);

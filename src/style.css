@@ -165,6 +165,14 @@ input[type="color"] {
   margin: 2px 0;
 }
 
+.drop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 6px 0 8px;
+}
+
 .btn,
 .btn-secondary {
   font: inherit;
