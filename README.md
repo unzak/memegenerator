@@ -30,12 +30,15 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
 3. Arrastra la **foto**, elígela con el botón, o pégala con **Ctrl+V** en
    cualquier parte de la página. El atajo sigue funcionando aunque no se
    anuncie en el panel.
-4. Ajusta el **encuadre**. Como el lienzo no se mueve, lo que la banda ocupa se
-   lo quita al hueco de la foto, y la foto se recorta para llenarlo. El
-   deslizador hace zoom, y arrastrando sobre la vista previa la mueves.
-5. Cambia los **colores** si quieres: banda, texto y resaltado, cada uno con un
-   desplegable de la paleta de la casa. El rosa es el de Cabronazi y el verde el
-   de Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` de news-maker.
+4. Ajusta el **encuadre** con la barra que hay bajo la caja de la imagen. Como
+   el lienzo no se mueve, lo que la banda ocupa se lo quita al hueco de la foto,
+   y la foto se recorta para llenarlo. La barra hace zoom, y arrastrando sobre
+   la vista previa la mueves.
+5. Cambia los **colores** si quieres. El apartado va plegado, porque casi
+   siempre son los mismos: se despliega pulsando en su título. Dentro, banda,
+   texto y resaltado, cada uno con las muestras de la paleta de la casa además
+   del selector libre. El rosa es el de Cabronazi y el verde el de
+   Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` de news-maker.
 6. **GENERA**, y abajo aparece la imagen con el botón de descarga.
 
 La **rueda del ratón** y el **pellizco de dos dedos** actúan sobre lo que haya

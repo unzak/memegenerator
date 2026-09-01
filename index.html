@@ -28,19 +28,19 @@
         </div>
 
         <div class="field">
-          <label for="align">Alineación</label>
-          <select id="align">
-            <option value="center" selected>Centrado</option>
-            <option value="left">A la izquierda</option>
-          </select>
-        </div>
-
-        <div class="field">
           <label for="size">
             Tamaño de letra
             <span class="muted small">· <span id="size-value">52</span> px · la banda se adapta</span>
           </label>
           <input type="range" id="size" min="26" max="84" step="1" value="52" />
+        </div>
+
+        <div class="field">
+          <label for="align">Alineación</label>
+          <select id="align">
+            <option value="center" selected>Centrado</option>
+            <option value="left">A la izquierda</option>
+          </select>
         </div>
 
         <h2>2 · Imagen</h2>
@@ -52,27 +52,30 @@
           <p class="muted small" id="file-name">Ningún archivo seleccionado</p>
         </div>
 
-        <h2>3 · Encuadre</h2>
         <div class="field">
-          <label for="zoom">
-            Zoom <span class="muted small">· arrastra la vista previa para mover la foto</span>
-          </label>
           <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" />
         </div>
 
-        <h2>4 · Colores</h2>
-        <div class="field">
-          <label for="color-band">Banda</label>
-          <select id="color-band"></select>
-        </div>
-        <div class="field">
-          <label for="color-text">Texto</label>
-          <select id="color-text"></select>
-        </div>
-        <div class="field">
-          <label for="color-highlight">Resaltado</label>
-          <select id="color-highlight"></select>
-        </div>
+        <details class="section">
+          <summary>3 · Colores</summary>
+          <div class="colors">
+            <div class="field">
+              <label for="color-band">Banda</label>
+              <input type="color" id="color-band" value="#ffffff" />
+              <div class="swatches" data-for="color-band"></div>
+            </div>
+            <div class="field">
+              <label for="color-text">Texto</label>
+              <input type="color" id="color-text" value="#000000" />
+              <div class="swatches" data-for="color-text"></div>
+            </div>
+            <div class="field">
+              <label for="color-highlight">Resaltado</label>
+              <input type="color" id="color-highlight" value="#e11d2f" />
+              <div class="swatches" data-for="color-highlight"></div>
+            </div>
+          </div>
+        </details>
 
         <button type="button" id="generate" class="btn">GENERA</button>
         <p class="status" id="status"></p>

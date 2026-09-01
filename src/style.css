@@ -79,6 +79,73 @@ h2:not(:first-child) {
   margin-top: 26px;
 }
 
+/* La seccion de colores va plegada: casi siempre son los mismos. */
+.section {
+  margin-top: 26px;
+}
+
+.section > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  list-style: none;
+}
+
+.section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.section > summary::after {
+  content: " +";
+}
+
+.section[open] > summary::after {
+  content: " –";
+}
+
+.section > summary:hover {
+  color: var(--text);
+}
+
+.section[open] > summary {
+  margin-bottom: 12px;
+}
+
+.colors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+input[type="color"] {
+  width: 100%;
+  height: 38px;
+  padding: 2px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0;
+  cursor: pointer;
+}
+
 .field {
   margin-bottom: 16px;
 }
@@ -131,6 +198,11 @@ input[type="range"] {
   background: var(--panel-2);
   padding: 22px 16px;
   text-align: center;
+}
+
+/* La barra del encuadre va pegada debajo de la caja de la imagen. */
+.drop + .field {
+  margin-top: 12px;
 }
 
 .drop.over {

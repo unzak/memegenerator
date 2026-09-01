@@ -35,9 +35,9 @@ const fileEl = need<HTMLInputElement>("file");
 const pickEl = need<HTMLButtonElement>("pick");
 const fileNameEl = need<HTMLParagraphElement>("file-name");
 const zoomEl = need<HTMLInputElement>("zoom");
-const bandEl = need<HTMLSelectElement>("color-band");
-const textColorEl = need<HTMLSelectElement>("color-text");
-const highlightEl = need<HTMLSelectElement>("color-highlight");
+const bandEl = need<HTMLInputElement>("color-band");
+const textColorEl = need<HTMLInputElement>("color-text");
+const highlightEl = need<HTMLInputElement>("color-highlight");
 const generateEl = need<HTMLButtonElement>("generate");
 const statusEl = need<HTMLParagraphElement>("status");
 const previewEl = need<HTMLCanvasElement>("preview");
@@ -107,19 +107,22 @@ async function ensureFont(): Promise<void> {
 
 // --- Colores ---------------------------------------------------------------
 
-for (const [select, inicial] of [
-  [bandEl, COLOR_BAND],
-  [textColorEl, COLOR_TEXT],
-  [highlightEl, COLOR_HIGHLIGHT],
-] as const) {
+// Cada selector lleva su fila de muestras con la paleta de la casa, ademas del
+// color libre del propio input.
+for (const row of document.querySelectorAll<HTMLDivElement>(".swatches")) {
+  const target = need<HTMLInputElement>(row.dataset.for ?? "");
   for (const { label, hex } of COLORS) {
-    const opt = document.createElement("option");
-    opt.value = hex;
-    opt.textContent = label;
-    select.append(opt);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "swatch";
+    btn.style.background = hex;
+    btn.title = `${label} · ${hex}`;
+    btn.addEventListener("click", () => {
+      target.value = hex;
+      draw();
+    });
+    row.append(btn);
   }
-  select.value = inicial;
-  select.addEventListener("change", draw);
 }
 
 // --- Imagen ----------------------------------------------------------------
@@ -384,7 +387,7 @@ function draw(): void {
   previewInfoEl.textContent = `${layout.width} × ${layout.height} px · ${band}`;
 }
 
-for (const el of [textEl, sizeEl]) {
+for (const el of [textEl, sizeEl, bandEl, textColorEl, highlightEl]) {
   el.addEventListener("input", draw);
 }
 
@@ -427,4 +430,7 @@ downloadEl.addEventListener("click", () => {
 textEl.value = "";
 sizeEl.value = String(FONT_SIZE);
 previewEl.width = CANVAS_W;
+bandEl.value = COLOR_BAND;
+textColorEl.value = COLOR_TEXT;
+highlightEl.value = COLOR_HIGHLIGHT;
 void ensureFont().then(draw);
