@@ -22,17 +22,12 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    así que sale igual en cualquier equipo sin depender de lo que tenga
    instalado. No es una negrita — Medium es peso 500 —, así que el rótulo se ve
    ligero a propósito.
-
-   **Helvetica solo sale como Helvetica donde esté instalada**, que en la
-   práctica es Mac. Windows la sustituye por Arial a nivel de sistema, y como
-   las dos son métricamente idénticas a propósito, el resultado es exactamente
-   el mismo que «Arial Bold» y no hay forma de detectarlo desde el navegador.
 3. Mete la **foto** soltándola directamente sobre la vista previa — vale
    soltarla en cualquier parte de la página. Mientras no haya ninguna, la previa
    se muestra punteada y pulsándola se abre el selector de archivo; también hay
    un botón «Elegir archivo…» en el panel, y **Ctrl+V** pega la del
    portapapeles.
-4. Ajusta el **encuadre** con la barra que hay bajo la caja de la imagen. Como
+4. Ajusta el **encuadre** con la barra que hay bajo el botón de la imagen. Como
    el lienzo no se mueve, lo que la banda ocupa se lo quita al hueco de la foto,
    y la foto se recorta para llenarlo. La barra hace zoom, y arrastrando sobre
    la vista previa la mueves.
