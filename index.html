@@ -44,10 +44,8 @@
         </div>
 
         <h2>2 · Imagen</h2>
-        <div id="drop" class="drop">
+        <div class="field">
           <input type="file" id="file" accept="image/*" hidden />
-          <p><strong>Arrastra una foto aquí</strong></p>
-          <p class="muted">o</p>
           <button type="button" id="pick" class="btn-secondary">Elegir archivo…</button>
           <p class="muted small" id="file-name">Ningún archivo seleccionado</p>
         </div>
@@ -83,8 +81,12 @@
 
       <section class="panel" id="preview-panel">
         <h2>Vista previa</h2>
-        <div class="stage">
+        <div class="stage" id="stage">
           <canvas id="preview"></canvas>
+          <div class="hint" id="hint">
+            <p><strong>Suelta aquí la foto</strong></p>
+            <p class="muted small">o pulsa para elegirla · también vale Ctrl+V</p>
+          </div>
         </div>
         <p class="muted small" id="preview-info"></p>
       </section>

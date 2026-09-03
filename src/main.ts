@@ -30,7 +30,8 @@ const textEl = need<HTMLTextAreaElement>("text");
 const alignEl = need<HTMLSelectElement>("align");
 const sizeEl = need<HTMLInputElement>("size");
 const sizeValueEl = need<HTMLSpanElement>("size-value");
-const dropEl = need<HTMLDivElement>("drop");
+const stageEl = need<HTMLDivElement>("stage");
+const hintEl = need<HTMLDivElement>("hint");
 const fileEl = need<HTMLInputElement>("file");
 const pickEl = need<HTMLButtonElement>("pick");
 const fileNameEl = need<HTMLParagraphElement>("file-name");
@@ -176,18 +177,30 @@ fileEl.addEventListener("change", () => {
   if (file) void loadFile(file);
 });
 
-for (const type of ["dragenter", "dragover"]) {
-  dropEl.addEventListener(type, (e) => {
-    e.preventDefault();
-    dropEl.classList.add("over");
-  });
-}
-for (const type of ["dragleave", "drop"]) {
-  dropEl.addEventListener(type, () => dropEl.classList.remove("over"));
-}
-dropEl.addEventListener("drop", (e) => {
+// Mientras no haya foto, la previa entera es el sitio donde soltarla.
+stageEl.addEventListener("click", () => {
+  if (!state.photo) fileEl.click();
+});
+
+/**
+ * Soltar vale en cualquier parte de la pagina, no solo sobre la previa: si no
+ * se corta el evento, el navegador se va a abrir el fichero y se pierde todo.
+ * El resalte se quita con un temporizador en vez de con `dragleave`, que salta
+ * sin parar al pasar por encima de los hijos.
+ */
+let overTimer = 0;
+window.addEventListener("dragover", (e) => {
   e.preventDefault();
-  const file = (e as DragEvent).dataTransfer?.files?.[0];
+  stageEl.classList.add("over");
+  clearTimeout(overTimer);
+  overTimer = window.setTimeout(() => stageEl.classList.remove("over"), 150);
+});
+
+window.addEventListener("drop", (e) => {
+  e.preventDefault();
+  clearTimeout(overTimer);
+  stageEl.classList.remove("over");
+  const file = e.dataTransfer?.files?.[0];
   if (file) void loadFile(file);
 });
 
@@ -375,6 +388,7 @@ previewEl.addEventListener(
 // --- Dibujo ----------------------------------------------------------------
 
 function draw(): void {
+  hintEl.hidden = state.photo !== null;
   // Centralizado aqui: asi ningun cambio puede dejar un encuadre invalido.
   // Escribir tambien mueve el hueco de la foto, y sin esto un desplazamiento
   // que era valido con la banda corta destapaba la banda al crecer.
