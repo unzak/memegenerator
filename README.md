@@ -38,6 +38,10 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` de news-maker.
 6. **GENERA**, y abajo aparece la imagen con el botón de descarga.
 
+En escritorio la vista previa acompaña al scroll, así que los controles de más
+abajo se tocan viendo lo que le pasa al rótulo. En móvil no, que ahí las dos
+columnas van apiladas.
+
 La **rueda del ratón** y el **pellizco de dos dedos** actúan sobre lo que haya
 debajo, como en news-maker: encima de la foto hacen zoom de la foto, y encima
 del rótulo cambian el tamaño de la letra. Al pellizcar la foto, el punto medio
