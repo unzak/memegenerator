@@ -274,6 +274,15 @@ input[type="range"] {
   pointer-events: none;
 }
 
+/*
+ * Sin esto el aviso no se esconde nunca: el `display: flex` de arriba le gana
+ * al `display: none` que el navegador le pone al atributo `hidden`, porque una
+ * regla de hoja de estilos manda sobre la del agente de usuario.
+ */
+.hint[hidden] {
+  display: none;
+}
+
 .hint p {
   margin: 0;
 }
