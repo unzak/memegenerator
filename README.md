@@ -36,7 +36,11 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    texto y resaltado, cada uno con las muestras de la paleta de la casa además
    del selector libre. El rosa es el de Cabronazi y el verde el de
    Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` de news-maker.
-6. **GENERA**, y abajo aparece la imagen con el botón de descarga.
+6. **GENERA**, y abajo aparece la imagen con el botón de descarga. Ahí mismo se
+   revisa el texto con [LanguageTool](https://languagetool.org): ortografía y
+   gramática en español. El aviso sale junto al botón de descarga, que es el
+   punto de no retorno, y **solo señala** — nunca corrige ni impide generar,
+   porque a veces la errata es el chiste.
 
 En escritorio la vista previa acompaña al scroll, así que los controles de más
 abajo se tocan viendo lo que le pasa al rótulo. En móvil no, que ahí las dos
@@ -52,6 +56,24 @@ cada dibujo, así que tampoco escribir puede descolocarla.
 
 Si no escribes nada, no hay banda y sale la foto sola. Si dejas una línea en
 blanco entre dos párrafos, la banda la respeta.
+
+## La revisión del texto
+
+Se consulta el API pública de LanguageTool **solo al pulsar GENERA**, nunca por
+su cuenta: sus condiciones piden expresamente que no se manden peticiones
+automáticas, y una pulsación tuya no lo es. Además se guarda el último texto
+revisado, así que generar cuatro veces mientras cambias colores no gasta ni una
+consulta de más: es **una petición por texto distinto**.
+
+Tampoco estorba: la imagen se compone al instante y la revisión llega después.
+Si el servicio tarda o está caído, lo dice y ya está.
+
+Sus condiciones obligan a un enlace visible a languagetool.org sin
+`rel="nofollow"`, que va junto al aviso.
+
+Si algún día levantas un LanguageTool propio (es LGPL y hay imagen de Docker),
+basta cambiar `ENDPOINT` en `src/spell.ts`: ahí se caen los límites, las
+condiciones y el enlace obligatorio.
 
 ## Requisitos
 
@@ -85,6 +107,7 @@ despliega a Pages en cada push a `main`.
 | `src/format.ts` | Las medidas, la tipografía y la paleta. Es lo único que hay que tocar para cambiar el diseño. |
 | `src/render.ts` | El ajuste del texto y el dibujo sobre el lienzo. No toca el DOM. |
 | `src/main.ts` | La interfaz: carga de foto, encuadre, colores y descarga. |
+| `src/spell.ts` | La consulta a LanguageTool. No toca el DOM. |
 
 ## Pendiente
 

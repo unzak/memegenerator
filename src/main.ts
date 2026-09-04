@@ -18,6 +18,7 @@ import {
   type PhotoTransform,
   type RenderOptions,
 } from "./render.js";
+import { check, type Issue } from "./spell.js";
 import "./style.css";
 
 function need<T extends Element>(id: string): T {
@@ -46,6 +47,7 @@ const previewInfoEl = need<HTMLParagraphElement>("preview-info");
 const outputEl = need<HTMLElement>("output");
 const resultEl = need<HTMLCanvasElement>("result");
 const resultInfoEl = need<HTMLParagraphElement>("result-info");
+const reviewEl = need<HTMLDivElement>("review");
 const downloadEl = need<HTMLButtonElement>("download");
 
 function context(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
@@ -420,8 +422,62 @@ generateEl.addEventListener("click", () => {
     resultInfoEl.textContent = `${layout.width} × ${layout.height} px`;
     setStatus("Listo.");
     outputEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    // La revision va aparte y no se espera: la imagen ya esta hecha.
+    void review(textEl.value);
   });
 });
+
+// --- Revision del texto ----------------------------------------------------
+
+/** Ultimo texto revisado con exito, para no preguntar dos veces por lo mismo. */
+let reviewed = "";
+/** Cada revision anula el pintado de la anterior, que pudo tardar mas. */
+let reviewToken = 0;
+
+function reviewLine(html: string): void {
+  reviewEl.hidden = false;
+  reviewEl.innerHTML =
+    `${html} <a class="lt" href="https://languagetool.org" target="_blank" rel="noopener">LanguageTool</a>`;
+}
+
+function escape(text: string): string {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showIssues(issues: Issue[]): void {
+  if (issues.length === 0) {
+    reviewLine("<p>Sin erratas.</p>");
+    return;
+  }
+  // Solo se señala: con textos donde a veces la errata es el chiste, corregir
+  // solo seria peor que no revisar.
+  const items = issues
+    .map((i) => {
+      const to = i.replacements.length > 0 ? ` → <b>${escape(i.replacements.join(", "))}</b>` : "";
+      return `<li><q>${escape(i.text)}</q>${to} <span class="muted">· ${escape(i.message)}</span></li>`;
+    })
+    .join("");
+  const n = issues.length;
+  reviewLine(`<p>${n} ${n === 1 ? "aviso" : "avisos"} en el texto:</p><ul>${items}</ul>`);
+}
+
+async function review(text: string): Promise<void> {
+  if (text.trim() === reviewed) return;
+  const token = ++reviewToken;
+  reviewLine("<p>Revisando el texto…</p>");
+  try {
+    const issues = await check(text);
+    if (token !== reviewToken) return;
+    reviewed = text.trim();
+    showIssues(issues);
+  } catch {
+    if (token !== reviewToken) return;
+    // Que no se pueda revisar no es un problema del meme, que ya esta hecho.
+    reviewLine("<p>No se pudo revisar el texto.</p>");
+  }
+}
 
 downloadEl.addEventListener("click", () => {
   resultEl.toBlob((blob) => {

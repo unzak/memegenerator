@@ -332,6 +332,40 @@ input[type="range"] {
   text-align: center;
 }
 
+/* La revision va pegada al boton de descarga, que es el punto de no retorno. */
+.review {
+  max-width: 620px;
+  margin: 16px auto 0;
+  padding: 12px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: left;
+  font-size: 13px;
+}
+
+.review p {
+  margin: 0;
+}
+
+.review ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.review li {
+  margin-bottom: 4px;
+}
+
+.review q {
+  color: var(--error);
+}
+
+.review .lt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .output #download {
   max-width: 320px;
 }
