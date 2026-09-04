@@ -74,6 +74,29 @@ function plain(text: string): Plain {
 }
 
 /**
+ * Devuelve la sugerencia con la caja de la palabra que sustituye.
+ *
+ * Hace falta porque en inicio de frase LanguageTool capitaliza la sugerencia
+ * aunque lo escrito vaya en minuscula: "ortografia" devuelve "Ortografía". Sin
+ * esto, corregir una errata de la primera palabra te cambia ademas la caja, que
+ * es justo lo que no queremos. Filtrar `CASING` no cubre este caso, porque el
+ * aviso viene de la regla de erratas, no de la de mayusculas.
+ */
+function matchCase(original: string, replacement: string): string {
+  const first = replacement[0];
+  const head = original[0];
+  if (first === undefined || head === undefined) return replacement;
+
+  // Sin distincion de caja (cifras, signos) no hay nada que imitar.
+  const hasCase = original.toUpperCase() !== original.toLowerCase();
+  if (!hasCase) return replacement;
+
+  if (original === original.toUpperCase()) return replacement.toUpperCase();
+  if (head === head.toLowerCase()) return first.toLowerCase() + replacement.slice(1);
+  return first.toUpperCase() + replacement.slice(1);
+}
+
+/**
  * Devuelve lo que LanguageTool encuentra. Lanza si no se puede consultar, para
  * que quien llama decida — aqui la revision nunca debe estorbar al generado.
  */
@@ -97,12 +120,13 @@ export async function check(text: string): Promise<Issue[]> {
     const end = map[m.offset + m.length - 1];
     // Un aviso sin sitio en el original no se puede ni mostrar ni arreglar.
     if (start === undefined || end === undefined) continue;
+    const marked = clean.slice(m.offset, m.offset + m.length);
     issues.push({
-      text: clean.slice(m.offset, m.offset + m.length),
+      text: marked,
       message: m.message,
       replacements: (m.replacements ?? [])
         .slice(0, MAX_REPLACEMENTS)
-        .map((r) => r.value),
+        .map((r) => matchCase(marked, r.value)),
       start,
       end: end + 1,
     });
