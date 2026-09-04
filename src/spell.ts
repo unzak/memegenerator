@@ -23,6 +23,13 @@ export interface Issue {
   text: string;
   message: string;
   replacements: string[];
+  /**
+   * Posiciones en el texto ORIGINAL, con sus asteriscos. LanguageTool las da
+   * sobre el texto ya limpio, asi que se traducen al volver: si se corrigiera
+   * sobre el limpio, aplicar el arreglo se llevaria por delante el resaltado.
+   */
+  start: number;
+  end: number;
 }
 
 interface RawMatch {
@@ -32,12 +39,26 @@ interface RawMatch {
   replacements?: { value: string }[];
 }
 
+interface Plain {
+  text: string;
+  /** Para cada posicion del texto limpio, la que le toca en el original. */
+  map: number[];
+}
+
 /**
  * Quita los asteriscos del resaltado antes de mandar el texto: son marca
  * nuestra, no del idioma, y pegados a la palabra la convierten en otra cosa.
+ * Se guarda de donde salio cada caracter para poder volver.
  */
-function plain(text: string): string {
-  return text.replace(/\*/g, "");
+function plain(text: string): Plain {
+  let out = "";
+  const map: number[] = [];
+  for (let i = 0; i < text.length; i += 1) {
+    if (text[i] === "*") continue;
+    map.push(i);
+    out += text[i];
+  }
+  return { text: out, map };
 }
 
 /**
@@ -45,8 +66,8 @@ function plain(text: string): string {
  * que quien llama decida — aqui la revision nunca debe estorbar al generado.
  */
 export async function check(text: string): Promise<Issue[]> {
-  const clean = plain(text).trim();
-  if (clean.length === 0) return [];
+  const { text: clean, map } = plain(text);
+  if (clean.trim().length === 0) return [];
 
   const res = await fetch(ENDPOINT, {
     method: "POST",
@@ -57,11 +78,41 @@ export async function check(text: string): Promise<Issue[]> {
   if (!res.ok) throw new Error(`LanguageTool respondió ${res.status}`);
 
   const data = (await res.json()) as { matches?: RawMatch[] };
-  return (data.matches ?? []).map((m) => ({
-    text: clean.slice(m.offset, m.offset + m.length),
-    message: m.message,
-    replacements: (m.replacements ?? [])
-      .slice(0, MAX_REPLACEMENTS)
-      .map((r) => r.value),
-  }));
+  const issues: Issue[] = [];
+  for (const m of data.matches ?? []) {
+    const start = map[m.offset];
+    const end = map[m.offset + m.length - 1];
+    // Un aviso sin sitio en el original no se puede ni mostrar ni arreglar.
+    if (start === undefined || end === undefined) continue;
+    issues.push({
+      text: clean.slice(m.offset, m.offset + m.length),
+      message: m.message,
+      replacements: (m.replacements ?? [])
+        .slice(0, MAX_REPLACEMENTS)
+        .map((r) => r.value),
+      start,
+      end: end + 1,
+    });
+  }
+  return issues;
+}
+
+/**
+ * El texto con la primera sugerencia de cada aviso aplicada. Se va de atras
+ * hacia delante para que cada cambio no descoloque las posiciones de los que
+ * quedan, y se saltan los avisos que pisen a uno ya aplicado.
+ */
+export function applyFixes(text: string, issues: Issue[]): string {
+  let out = text;
+  let limit = text.length;
+  const ordered = issues
+    .filter((i) => i.replacements.length > 0)
+    .sort((a, b) => b.start - a.start);
+
+  for (const issue of ordered) {
+    if (issue.end > limit) continue;
+    out = out.slice(0, issue.start) + issue.replacements[0] + out.slice(issue.end);
+    limit = issue.start;
+  }
+  return out;
 }

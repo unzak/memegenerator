@@ -36,11 +36,12 @@ El lienzo es siempre **1080 × 1350**, el 4:5 de Facebook.
    texto y resaltado, cada uno con las muestras de la paleta de la casa además
    del selector libre. El rosa es el de Cabronazi y el verde el de
    Cabrodeportes, los mismos `#cc1c65` y `#00ce5c` de news-maker.
-6. **GENERA**, y abajo aparece la imagen con el botón de descarga. Ahí mismo se
-   revisa el texto con [LanguageTool](https://languagetool.org): ortografía y
-   gramática en español. El aviso sale junto al botón de descarga, que es el
-   punto de no retorno, y **solo señala** — nunca corrige ni impide generar,
-   porque a veces la errata es el chiste.
+6. **GENERA**, y abajo aparece la imagen con el botón de descarga. Antes de la
+   imagen sale la revisión del texto con
+   [LanguageTool](https://languagetool.org): ortografía y gramática en español,
+   con la frase corregida propuesta y un botón **CORREGIR** que la aplica y
+   rehace la imagen. Nunca corrige solo ni impide generar, porque a veces la
+   errata es el chiste.
 
 En escritorio la vista previa acompaña al scroll, así que los controles de más
 abajo se tocan viendo lo que le pasa al rótulo. En móvil no, que ahí las dos
@@ -67,6 +68,10 @@ consulta de más: es **una petición por texto distinto**.
 
 Tampoco estorba: la imagen se compone al instante y la revisión llega después.
 Si el servicio tarda o está caído, lo dice y ya está.
+
+La propuesta de corrección respeta los `*asteriscos*` del resaltado. Se quitan
+para consultar, pero se guarda de dónde salió cada carácter, así que al aplicar
+el arreglo vuelven a su sitio pegados a la palabra corregida.
 
 Sus condiciones obligan a un enlace visible a languagetool.org sin
 `rel="nofollow"`, que va junto al aviso.

@@ -18,7 +18,7 @@ import {
   type PhotoTransform,
   type RenderOptions,
 } from "./render.js";
-import { check, type Issue } from "./spell.js";
+import { applyFixes, check, type Issue } from "./spell.js";
 import "./style.css";
 
 function need<T extends Element>(id: string): T {
@@ -48,6 +48,11 @@ const outputEl = need<HTMLElement>("output");
 const resultEl = need<HTMLCanvasElement>("result");
 const resultInfoEl = need<HTMLParagraphElement>("result-info");
 const reviewEl = need<HTMLDivElement>("review");
+const reviewTitleEl = need<HTMLParagraphElement>("review-title");
+const reviewListEl = need<HTMLUListElement>("review-list");
+const reviewFixEl = need<HTMLDivElement>("review-fix");
+const reviewProposalEl = need<HTMLParagraphElement>("review-proposal");
+const fixEl = need<HTMLButtonElement>("fix");
 const downloadEl = need<HTMLButtonElement>("download");
 
 function context(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
@@ -411,7 +416,7 @@ alignEl.addEventListener("change", draw);
 
 // --- Salida ----------------------------------------------------------------
 
-generateEl.addEventListener("click", () => {
+function generate(): void {
   if (!state.photo) {
     setStatus("Falta la foto.", "error");
     return;
@@ -425,7 +430,9 @@ generateEl.addEventListener("click", () => {
     // La revision va aparte y no se espera: la imagen ya esta hecha.
     void review(textEl.value);
   });
-});
+}
+
+generateEl.addEventListener("click", generate);
 
 // --- Revision del texto ----------------------------------------------------
 
@@ -433,51 +440,63 @@ generateEl.addEventListener("click", () => {
 let reviewed = "";
 /** Cada revision anula el pintado de la anterior, que pudo tardar mas. */
 let reviewToken = 0;
+/** Texto propuesto por la ultima revision, el que aplica CORREGIR. */
+let proposal = "";
 
-function reviewLine(html: string): void {
+function setReview(title: string, issues: Issue[] = []): void {
   reviewEl.hidden = false;
-  reviewEl.innerHTML =
-    `${html} <a class="lt" href="https://languagetool.org" target="_blank" rel="noopener">LanguageTool</a>`;
-}
+  reviewTitleEl.textContent = title;
 
-function escape(text: string): string {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function showIssues(issues: Issue[]): void {
-  if (issues.length === 0) {
-    reviewLine("<p>Sin erratas.</p>");
-    return;
+  reviewListEl.replaceChildren();
+  reviewListEl.hidden = issues.length === 0;
+  for (const issue of issues) {
+    const li = document.createElement("li");
+    const marked = document.createElement("q");
+    marked.textContent = issue.text;
+    li.append(marked);
+    if (issue.replacements.length > 0) {
+      const to = document.createElement("b");
+      to.textContent = issue.replacements.join(", ");
+      li.append(" → ", to);
+    }
+    const why = document.createElement("span");
+    why.className = "muted";
+    why.textContent = ` · ${issue.message}`;
+    li.append(why);
+    reviewListEl.append(li);
   }
-  // Solo se señala: con textos donde a veces la errata es el chiste, corregir
-  // solo seria peor que no revisar.
-  const items = issues
-    .map((i) => {
-      const to = i.replacements.length > 0 ? ` → <b>${escape(i.replacements.join(", "))}</b>` : "";
-      return `<li><q>${escape(i.text)}</q>${to} <span class="muted">· ${escape(i.message)}</span></li>`;
-    })
-    .join("");
-  const n = issues.length;
-  reviewLine(`<p>${n} ${n === 1 ? "aviso" : "avisos"} en el texto:</p><ul>${items}</ul>`);
+
+  // La propuesta solo sale si de verdad cambia algo respecto a lo escrito.
+  proposal = issues.length > 0 ? applyFixes(textEl.value, issues) : "";
+  const usable = proposal !== "" && proposal !== textEl.value;
+  reviewFixEl.hidden = !usable;
+  reviewProposalEl.textContent = usable ? proposal : "";
 }
 
 async function review(text: string): Promise<void> {
   if (text.trim() === reviewed) return;
   const token = ++reviewToken;
-  reviewLine("<p>Revisando el texto…</p>");
+  setReview("Revisando el texto…");
   try {
     const issues = await check(text);
     if (token !== reviewToken) return;
     reviewed = text.trim();
-    showIssues(issues);
+    const n = issues.length;
+    setReview(n === 0 ? "Sin erratas." : `${n} ${n === 1 ? "aviso" : "avisos"} en el texto`, issues);
   } catch {
     if (token !== reviewToken) return;
     // Que no se pueda revisar no es un problema del meme, que ya esta hecho.
-    reviewLine("<p>No se pudo revisar el texto.</p>");
+    setReview("No se pudo revisar el texto.");
   }
 }
+
+/** Aplica la propuesta al rotulo y rehace la imagen, que si no queda vieja. */
+fixEl.addEventListener("click", () => {
+  if (proposal === "" || proposal === textEl.value) return;
+  textEl.value = proposal;
+  draw();
+  generate();
+});
 
 downloadEl.addEventListener("click", () => {
   resultEl.toBlob((blob) => {
