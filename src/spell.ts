@@ -18,6 +18,17 @@ const TIMEOUT_MS = 8000;
 /** Mas de tres sugerencias no caben en una linea y no ayudan a decidir. */
 const MAX_REPLACEMENTS = 3;
 
+/**
+ * Categorias que no se avisan. `CASING` son las reglas de mayusculas, y aqui
+ * estorban: un rotulo empieza en minuscula o va entero en caja alta cuando al
+ * meme le conviene, no cuando lo dice la norma.
+ *
+ * Ojo, esto no toca las tildes: un texto en mayusculas sigue avisando de que
+ * "ESTA" del verbo estar lleva tilde, y la sugerencia llega tambien en
+ * mayusculas.
+ */
+const IGNORED_CATEGORIES = new Set(["CASING"]);
+
 export interface Issue {
   /** El trozo del rotulo que se marca. */
   text: string;
@@ -37,6 +48,7 @@ interface RawMatch {
   length: number;
   message: string;
   replacements?: { value: string }[];
+  rule?: { id: string; category?: { id?: string } };
 }
 
 interface Plain {
@@ -80,6 +92,7 @@ export async function check(text: string): Promise<Issue[]> {
   const data = (await res.json()) as { matches?: RawMatch[] };
   const issues: Issue[] = [];
   for (const m of data.matches ?? []) {
+    if (IGNORED_CATEGORIES.has(m.rule?.category?.id ?? "")) continue;
     const start = map[m.offset];
     const end = map[m.offset + m.length - 1];
     // Un aviso sin sitio en el original no se puede ni mostrar ni arreglar.

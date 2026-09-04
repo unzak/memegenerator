@@ -69,6 +69,12 @@ consulta de más: es **una petición por texto distinto**.
 Tampoco estorba: la imagen se compone al instante y la revisión llega después.
 Si el servicio tarda o está caído, lo dice y ya está.
 
+No se avisa de **mayúsculas**: las reglas de la categoría `CASING` se descartan,
+porque un rótulo empieza en minúscula o va entero en caja alta cuando al meme le
+conviene, no cuando lo dice la norma. Eso no toca las tildes — un texto en
+mayúsculas sigue avisando de que «ESTA» del verbo estar lleva tilde, y la
+sugerencia llega también en mayúsculas.
+
 La propuesta de corrección respeta los `*asteriscos*` del resaltado. Se quitan
 para consultar, pero se guarda de dónde salió cada carácter, así que al aplicar
 el arreglo vuelven a su sitio pegados a la palabra corregida.
