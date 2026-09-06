@@ -2,11 +2,10 @@
   <!-- Cuadro con las esquinas redondeadas, el rosa del panel Pulso Viral -->
   <rect x="36" y="36" width="440" height="440" rx="84" fill="#ED1470"/>
 
-  <!-- La banda del rotulo, arriba, con las dos lineas del texto -->
-  <rect x="116" y="120" width="280" height="120" rx="22" fill="#FFFFFF"/>
-  <rect x="148" y="154" width="216" height="22" rx="11" fill="#ED1470"/>
-  <rect x="148" y="192" width="152" height="22" rx="11" fill="#ED1470"/>
-
-  <!-- La foto, debajo -->
-  <rect x="116" y="266" width="280" height="126" rx="22" fill="#28151F"/>
+  <!-- Cara blanca sonriente. Ojos y boca se recortan en el rosa del cuadro -->
+  <circle cx="256" cy="256" r="150" fill="#FFFFFF"/>
+  <circle cx="206" cy="212" r="22" fill="#ED1470"/>
+  <circle cx="306" cy="212" r="22" fill="#ED1470"/>
+  <path d="M186 288 Q256 372 326 288" fill="none" stroke="#ED1470"
+        stroke-width="34" stroke-linecap="round"/>
 </svg>
