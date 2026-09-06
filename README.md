@@ -126,6 +126,25 @@ despliega a Pages en cada push a `main`.
 | `src/main.ts` | La interfaz: carga de foto, encuadre, colores y descarga. |
 | `src/spell.ts` | La consulta a LanguageTool. No toca el DOM. |
 
+## Aspecto
+
+La página lleva el mismo aire que el panel
+[Pulso Viral](https://github.com/unzak/noticias-virales): fondo rosa muy claro
+con dos degradados anclados a la ventana, papel blanco con sombra rosada, el
+rosa `#ed1470` de acento, Inter en la interfaz y una cabecera con el rótulo del
+punto, el icono y el titular grande.
+
+Arriba va el menú de las tres herramientas, pegado al borde superior: la
+abierta en la pastilla rosa y las otras dos a un clic. Los enlaces apuntan a
+GitHub Pages, así que sirviendo en local solo responde en `localhost` la que
+tengas levantada; las otras saltan a la publicada. Por debajo de 560 px se
+quedan los nombres cortos, que los tres enteros no caben.
+
+Es solo la piel. Los colores viven en las variables de `src/style.css`, así que
+el PNG que se descarga no se entera de nada. Lo único que cambió de sitio es la
+cuadrícula de detrás del lienzo, ahora en rosa claro: sigue estando para ver
+dónde acaba una foto clara sobre la banda blanca.
+
 ## Pendiente
 
 - **Medir la referencia.** Lo que hizo que news-maker saliera clavado fue medir
