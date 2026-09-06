@@ -183,6 +183,26 @@
       <button type="button" id="download" class="btn">Descargar PNG</button>
     </section>
 
+    <!-- Vista previa flotante. Solo aparece en pantallas estrechas. -->
+    <div id="mini" class="mini" aria-hidden="true">
+      <button
+        type="button"
+        id="mini-close"
+        class="mini-close"
+        aria-label="Cerrar la vista previa flotante"
+      >
+        ×
+      </button>
+      <canvas
+        id="mini-canvas"
+        class="mini-canvas"
+        width="240"
+        height="300"
+        role="img"
+        aria-label="Vista previa reducida. Tócala para ir a la vista previa completa."
+      ></canvas>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

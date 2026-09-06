@@ -47,6 +47,16 @@ En escritorio la vista previa acompaña al scroll, así que los controles de má
 abajo se tocan viendo lo que le pasa al rótulo. En móvil no, que ahí las dos
 columnas van apiladas.
 
+En el móvil aparece una **miniatura flotante** arriba a la derecha, colgada de
+la barra de herramientas, en cuanto hay foto: sirve para ir viendo el resultado
+mientras se escribe el rótulo. Se retira sola al llegar al apartado de la vista previa,
+se cierra con la ✕ (y ya no vuelve en esa sesión), y tocándola salta a la previa
+completa.
+
+Va arriba y no abajo a la derecha, que es donde estaba en news-maker: ahí
+descansa el pulgar, y por ese filo entran GENERA y el botón de descarga, así que
+tapaba justo lo que se iba a pulsar.
+
 La **rueda del ratón** y el **pellizco de dos dedos** actúan sobre lo que haya
 debajo, como en news-maker: encima de la foto hacen zoom de la foto, y encima
 del rótulo cambian el tamaño de la letra. Al pellizcar la foto, el punto medio
